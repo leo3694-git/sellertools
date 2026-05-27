@@ -863,6 +863,7 @@
             📊 單件商品手動快速試算區 (無須匯入 Excel 即可使用)
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <!-- 1. 目的地國家 -->
             <div class="input-group" style="position: relative;">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">試算目的地國家</label>
                 <div class="custom-dropdown" id="manualCountryDropdownContainer">
@@ -882,26 +883,37 @@
                     </div>
                 </div>
             </div>
+            <!-- 2. 我的成本 (採購成本) -->
             <div class="input-group">
-                <label style="color: var(--accent-green); font-size: 0.72rem;">商品採購成本 (RMB)</label>
+                <label style="color: var(--accent-green); font-size: 0.72rem;">我的成本 (採購 RMB)</label>
                 <input type="number" id="manualCost" class="input-control" value="40" step="1" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
+            <!-- 3. 平台拿走%數 -->
             <div class="input-group">
-                <label style="color: var(--accent-green); font-size: 0.72rem;">商品重量 (KG)</label>
-                <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">平台手續費 (%)</label>
+                <input type="number" id="manualPlatformFee" class="input-control" value="10" step="0.1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
+            <!-- 4. 我想要的利潤 -->
             <div class="input-group">
-                <label style="color: var(--accent-green); font-size: 0.72rem;">預期利潤 (%)</label>
+                <label style="color: var(--accent-green); font-size: 0.72rem;">我想要的利潤 (%)</label>
                 <input type="number" id="manualMargin" class="input-control" value="20" step="1" min="-99" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
+            <!-- 5. 重量 -->
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">重量 (商品重量 KG)</label>
+                <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <!-- 6. 活動折扣 (%) -->
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">活動折扣 (%)</label>
                 <input type="number" id="manualDiscount" class="input-control" value="30" step="1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
+            <!-- 7. 對手價格 (含平台手續) -->
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">對手含運售價 (USD - 選填)</label>
                 <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="試算對手利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
+            <!-- 8. 將運費併入售價 -->
             <div class="input-group" style="justify-content: center; align-items: flex-start; height: 100%;">
                 <label style="display: flex; align-items: center; gap: 0.45rem; cursor: pointer; user-select: none; margin-top: 1.35rem;">
                     <input type="checkbox" id="manualMergeShippingToggle" checked onchange="toggleManualMergeShipping()" style="width: 16px; height: 16px; accent-color: var(--accent-green); cursor: pointer;">
@@ -928,10 +940,10 @@
             <div style="border-left: 3px solid var(--accent-green); padding-left: 0.75rem;">
                 <strong style="color: var(--accent-green);">1. 買家實付【特價 (USD)】</strong>：涵蓋全部成本，保證您的目標實際利潤率
                 <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">
-                    特價 (USD) = [ 總成本 × (1 + 實際利潤%) ] ÷ [ 匯率 × (1 - 平台費率%) ]
+                    特價 (USD) = 總成本 × (1 + 實際利潤%) ÷ 匯率
                 </div>
                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
-                    * 總成本 = 進貨價 + 國內運費 + 無憂標準運費 + 海關報關費
+                    * 總成本 (含平台手續) = (進貨價 + 國內運費 + 無憂標準運費 + 海關報關費) ÷ (1 - 平台費率%)
                 </div>
             </div>
             <div style="border-left: 3px solid var(--primary); padding-left: 0.75rem;">
@@ -1805,7 +1817,7 @@
         const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
         const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
         const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
-        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
+        const platformFeeRate = parseFloat(document.getElementById('manualPlatformFee').value) || 10;
 
         // Determine selected country for manual calculator
         const selectedCountryCode = manualPrimaryCountry;
@@ -1816,6 +1828,7 @@
 
         // Suggested formulas
         const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+        const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
         const totalDiscount = Math.min(99, discount + extraDisc);
         const netDiscountFactor = 1 - totalDiscount / 100;
 
@@ -1840,9 +1853,9 @@
                 <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
             </div>
             <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含手續報關)</div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${totalCostRMB.toFixed(2)}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國內 ¥${domesticShippingRMB} | 報關 ¥${customsFeeRMB}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含平台手續)</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${displayedTotalCostRMB.toFixed(2)}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
             </div>
             <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
@@ -2019,6 +2032,7 @@
             const totalCostRMB = currentItem.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
             const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+            const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
             const totalDiscount = Math.min(99, activityDiscount + extraDisc);
             const netDiscountFactor = 1 - totalDiscount / 100;
 
@@ -2051,7 +2065,7 @@
                     <td style="font-weight:600; padding: 0.3rem 0.5rem;">${primaryMarker}${rates.name} (${rates.code})</td>
                     <td style="text-align:center; padding: 0.3rem 0.5rem;">${weight.toFixed(3)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">¥${shippingRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem;">¥${totalCostRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem;">¥${displayedTotalCostRMB.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:#10b981;">¥${saleRMB.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:#10b981;">$${saleUSD.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:#a78bfa;">¥${retailRMB.toFixed(2)}</td>
@@ -2129,6 +2143,7 @@
             const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
             const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+            const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
             const totalDiscount = Math.min(99, activityDiscount + extraDisc);
             const netDiscountFactor = 1 - totalDiscount / 100;
 
@@ -2209,7 +2224,7 @@
                             onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:70px;">
                     </td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
-                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: #fff;">¥${totalCostRMB.toFixed(2)}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: #fff;">¥${displayedTotalCostRMB.toFixed(2)}</td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${competitorPriceRMB.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0" value="${competitorPriceUSD.toFixed(2)}" 
@@ -2578,6 +2593,7 @@
 
                         const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
                         const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+                        const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
                         const totalDiscount = Math.min(99, activityDiscount + extraDisc);
                         const netDiscountFactor = 1 - totalDiscount / 100;
 
@@ -2620,7 +2636,7 @@
 
                             originalRowCopy.push(weight);
                             originalRowCopy.push(shippingRMB);
-                            originalRowCopy.push(totalCostRMB);
+                            originalRowCopy.push(parseFloat(displayedTotalCostRMB.toFixed(2)));
                             originalRowCopy.push(competitorPriceRMB);
                             originalRowCopy.push(competitorPriceUSD);
                             originalRowCopy.push(competitorFeeRMB);
@@ -2688,45 +2704,4 @@
                 const prodBuf = await prodResponse.arrayBuffer();
                 prodLoaded = parseProductsData(prodBuf);
             } else {
-                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodResponse.status);
-            }
-        } catch (err) {
-            console.warn('自動載入 速賣通價格計算工具.xlsx 被 CORS 攔截或檔案不存在:', err);
-        }
-
-        if (!shipLoaded || !prodLoaded) {
-            if (!shipLoaded) {
-                shipTitle.innerText = originalShipTitle;
-            }
-            if (!prodLoaded) {
-                prodTitle.innerText = originalProdTitle;
-            }
-
-            if (window.location.protocol === 'file:') {
-                showCORSAlert();
-            }
-        } else {
-            showToast('已成功自動載入本地 Excel 數據！');
-        }
-    }
-
-    // Show CORS security instructions
-    function showCORSAlert() {
-        const alertBox = document.getElementById('corsAlert');
-        if (alertBox) {
-            alertBox.style.display = 'block';
-        }
-    }
-
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerText = msg;
-        toast.style.display = 'block';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 3000);
-    }
-</script>
-
-</body>
-</html>
+                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodR
