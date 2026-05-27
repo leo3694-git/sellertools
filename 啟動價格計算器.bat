@@ -19,7 +19,7 @@ if %errorlevel% equ 0 (
     echo 🚀 正在使用 npx serve 啟動本地伺服器...
     echo.
     echo -------------------------------------------------------------
-    echo 本地網址: http://localhost:8080/ali_pricing_tool.html
+    echo 本地網址: http://localhost:8080/index.html
     echo (請保持此視窗開啟以進行讀取。使用完畢後，直接關閉此視窗即可)
     echo -------------------------------------------------------------
     echo.
@@ -35,11 +35,11 @@ if %errorlevel% equ 0 (
     echo 🚀 正在使用 Python http.server 啟動本地伺服器...
     echo.
     echo -------------------------------------------------------------
-    echo 本地網址: http://localhost:8080/ali_pricing_tool.html
+    echo 本地網址: http://localhost:8080/index.html
     echo (請保持此視窗開啟以進行讀取。使用完畢後，直接關閉此視窗即可)
     echo -------------------------------------------------------------
     echo.
-    start http://localhost:8080/ali_pricing_tool.html
+    start http://localhost:8080/index.html
     python -m http.server 8080
     goto end
 )
@@ -57,6 +57,6 @@ echo 您可以直接把 Excel 拖曳進網頁中計算。
 echo.
 echo 按任意鍵將直接為您打開 HTML 網頁...
 pause >nul
-start ali_pricing_tool.html
+start index.html
 
 :end
