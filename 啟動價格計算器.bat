@@ -23,7 +23,7 @@ if %errorlevel% equ 0 (
     echo (請保持此視窗開啟以進行讀取。使用完畢後，直接關閉此視窗即可)
     echo -------------------------------------------------------------
     echo.
-    start http://localhost:8080/ali_pricing_tool.html
+    start http://localhost:8080/index.html
     npx -y serve -l 8080 .
     goto end
 )
