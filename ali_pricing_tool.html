@@ -674,6 +674,18 @@
                 </div>
             </div>
         </div>
+    <!-- CORS Security Warning Alert Banner (Visible only under file:/// protocol when autoload fails) -->
+    <div id="corsAlert" class="glass-card" style="display: none; padding: 1.25rem 2rem; margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.04);">
+        <h3 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: #f59e0b; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; stroke: #f59e0b;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            瀏覽器本地開啟安全性提示 (CORS 跨域限制)
+        </h3>
+        <p style="font-size: 0.88rem; line-height: 1.6; color: #f3f4f6;">
+            💡 偵測到您目前是直接雙擊開啟網頁。由於瀏覽器的隱私安全限制，此模式下 JavaScript 無法自動載入本地 Excel 檔案。<br>
+            <strong>✨ 完美免上傳方案：</strong> 請<strong>雙擊執行資料夾中的『啟動價格計算器.bat』</strong>，網頁便可完美自動加載本地 Excel，無需任何手動上傳！或是您可以直接將檔案上傳至 GitHub Pages。當然，您仍然可以像以前一樣<strong>直接拖放這兩個 Excel 檔案</strong>至下方虛線框進行上傳。
+        </p>
     </div>
 
     <!-- File Drop Zones -->
@@ -888,6 +900,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         setupDragAndDrop();
         setupFileSelectors();
+        autoLoadExcelFiles();
     });
 
     function setupDragAndDrop() {
@@ -959,63 +972,71 @@
     function handleShippingFile(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-                // We start parsing from row index 14 onwards (Albania starts here)
-                const rates = {};
-                for (let i = 14; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length < 3) continue;
-                    
-                    const countryName = row[0];
-                    const englishName = row[1];
-                    const code = row[2];
-
-                    if (!countryName || !code) continue;
-
-                    // Extracted values per columns
-                    rates[code] = {
-                        name: String(countryName).trim(),
-                        englishName: String(englishName).trim(),
-                        code: String(code).trim(),
-                        general_0_150_ship: parseFloat(row[3]) || 0,
-                        general_0_150_reg: parseFloat(row[4]) || 0,
-                        general_150_300_ship: parseFloat(row[5]) || 0,
-                        general_150_300_reg: parseFloat(row[6]) || 0,
-                        general_300_2000_ship: parseFloat(row[7]) || 0,
-                        general_300_2000_reg: parseFloat(row[8]) || 0,
-                        special_0_2000_ship: parseFloat(row[9]) || 0,
-                        special_0_2000_reg: parseFloat(row[10]) || 0,
-                        large_first_0_5kg: parseFloat(row[11]) || 0,
-                        large_next_0_5kg: parseFloat(row[12]) || 0
-                    };
-                }
-
-                shippingRates = rates;
-                
-                // Update Zone State
-                const zone = document.getElementById('shippingDropZone');
-                zone.classList.add('success');
-                document.getElementById('shipTitle').innerText = '無憂標準運費資料載入成功！';
-                const fileInfo = document.getElementById('shippingFileInfo');
-                fileInfo.innerText = `已讀取 ${Object.keys(rates).length} 個國家/地區的配送報價。`;
-                fileInfo.style.display = 'block';
-
-                // Populate Country Select
-                populateCountryDropdown();
-                checkVerificationAndShowDashboard();
+            if (parseShippingData(e.target.result)) {
                 showToast(`已成功導入無憂標準運費資料！`);
-            } catch (err) {
-                console.error(err);
-                alert('解析無憂標準.xlsx失敗！請確保檔案格式正確。');
             }
         };
         reader.readAsArrayBuffer(file);
+    }
+
+    // Parse "無憂標準.xlsx" Shipping Rates from ArrayBuffer
+    function parseShippingData(arrayBuffer) {
+        try {
+            const data = new Uint8Array(arrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            // We start parsing from row index 14 onwards (Albania starts here)
+            const rates = {};
+            for (let i = 14; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 3) continue;
+                
+                const countryName = row[0];
+                const englishName = row[1];
+                const code = row[2];
+
+                if (!countryName || !code) continue;
+
+                // Extracted values per columns
+                rates[code] = {
+                    name: String(countryName).trim(),
+                    englishName: String(englishName).trim(),
+                    code: String(code).trim(),
+                    general_0_150_ship: parseFloat(row[3]) || 0,
+                    general_0_150_reg: parseFloat(row[4]) || 0,
+                    general_150_300_ship: parseFloat(row[5]) || 0,
+                    general_150_300_reg: parseFloat(row[6]) || 0,
+                    general_300_2000_ship: parseFloat(row[7]) || 0,
+                    general_300_2000_reg: parseFloat(row[8]) || 0,
+                    special_0_2000_ship: parseFloat(row[9]) || 0,
+                    special_0_2000_reg: parseFloat(row[10]) || 0,
+                    large_first_0_5kg: parseFloat(row[11]) || 0,
+                    large_next_0_5kg: parseFloat(row[12]) || 0
+                };
+            }
+
+            shippingRates = rates;
+            
+            // Update Zone State
+            const zone = document.getElementById('shippingDropZone');
+            zone.classList.add('success');
+            document.getElementById('shipTitle').innerText = '無憂標準運費資料載入成功！';
+            const fileInfo = document.getElementById('shippingFileInfo');
+            fileInfo.innerText = `已讀取 ${Object.keys(rates).length} 個國家/地區的配送報價。`;
+            fileInfo.style.display = 'block';
+
+            // Populate Country Select
+            populateCountryDropdown();
+            checkVerificationAndShowDashboard();
+            return true;
+        } catch (err) {
+            console.error(err);
+            alert('解析無憂標準.xlsx失敗！請確保檔案格式正確。');
+            return false;
+        }
     }
 
     // Populate searchable selection
@@ -1045,94 +1066,170 @@
     function handleProductsFile(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                
-                productsData = {};
-                itemOverrides = {};
-                competitorPrices = {};
-
-                workbook.SheetNames.forEach(sheetName => {
-                    const sheet = workbook.Sheets[sheetName];
-                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    if (rows.length < 2) return; // Skip empty sheets
-
-                    const headers = rows[1]; // Index 1 has our true column headers
-                    if (!headers) return;
-
-                    let nameColIdx = 2; // Default column index heuristics
-                    let costColIdx = 3;
-
-                    headers.forEach((h, idx) => {
-                        if (h) {
-                            const val = String(h).trim();
-                            if (val.includes('商品編號') || val.includes('商品编号') || val.includes('商品编号PCB') || val.includes('商品編號PCB')) {
-                                nameColIdx = idx;
-                            }
-                            if (val === '成本') {
-                                costColIdx = idx;
-                            }
-                            if (val === 'RMB' && sheetName === 'XZ板子') {
-                                costColIdx = idx;
-                            }
-                            if (val === '售價' || val === '售价') {
-                                // Fallback to 售价 for other sheets
-                                if (sheetName !== 'XK' && sheetName !== 'XZ板子') {
-                                    costColIdx = idx;
-                                }
-                            }
-                        }
-                    });
-
-                    // Parse item rows from index 2 onwards
-                    const items = [];
-                    for (let r = 2; r < rows.length; r++) {
-                        const row = rows[r];
-                        if (!row) continue;
-                        
-                        const code = row[nameColIdx];
-                        let cost = parseFloat(row[costColIdx]);
-
-                        // Skip rows with missing product code or invalid/zero cost
-                        if (code === undefined || code === null || String(code).trim() === '') continue;
-                        if (isNaN(cost)) cost = 0; // Fallback to 0
-
-                        items.push({
-                            code: String(code).trim(),
-                            cost: cost,
-                            rowIdx: r,
-                            originalRow: row, // Preserved for exporting exactly
-                            nameColIdx: nameColIdx,
-                            costColIdx: costColIdx
-                        });
-                    }
-
-                    if (items.length > 0) {
-                        productsData[sheetName] = items;
-                    }
-                });
-
-                // Update Zone State
-                const zone = document.getElementById('productsDropZone');
-                zone.classList.add('success');
-                document.getElementById('prodTitle').innerText = '速賣通產品資料載入成功！';
-                const fileInfo = document.getElementById('productsFileInfo');
+            if (parseProductsData(e.target.result)) {
                 let totalProd = 0;
                 Object.values(productsData).forEach(arr => totalProd += arr.length);
-                fileInfo.innerText = `已讀取 ${Object.keys(productsData).length} 個工作表，共 ${totalProd} 筆商品。`;
-                fileInfo.style.display = 'block';
-
-                // Populate tabs
-                buildSheetTabs();
-                checkVerificationAndShowDashboard();
                 showToast(`已成功導入 ${totalProd} 筆商品價格數據！`);
-            } catch (err) {
-                console.error(err);
-                alert('解析速賣通價格計算工具.xlsx失敗！請確保檔案格式正確。');
             }
         };
         reader.readAsArrayBuffer(file);
+    }
+
+    // Parse "速賣通價格計算工具.xlsx" Product Database from ArrayBuffer
+    function parseProductsData(arrayBuffer) {
+        try {
+            const data = new Uint8Array(arrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            productsData = {};
+            itemOverrides = {};
+            competitorPrices = {};
+
+            workbook.SheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                if (rows.length < 2) return; // Skip empty sheets
+
+                const headers = rows[1]; // Index 1 has our true column headers
+                if (!headers) return;
+
+                let nameColIdx = 2; // Default column index heuristics
+                let costColIdx = 3;
+
+                headers.forEach((h, idx) => {
+                    if (h) {
+                        const val = String(h).trim();
+                        if (val.includes('商品編號') || val.includes('商品编号') || val.includes('商品编号PCB') || val.includes('商品編號PCB')) {
+                            nameColIdx = idx;
+                        }
+                        if (val === '成本') {
+                            costColIdx = idx;
+                        }
+                        if (val === 'RMB' && sheetName === 'XZ板子') {
+                            costColIdx = idx;
+                        }
+                        if (val === '售價' || val === '售价') {
+                            // Fallback to 售价 for other sheets
+                            if (sheetName !== 'XK' && sheetName !== 'XZ板子') {
+                                costColIdx = idx;
+                            }
+                        }
+                    }
+                });
+
+                // Parse item rows from index 2 onwards
+                const items = [];
+                for (let r = 2; r < rows.length; r++) {
+                    const row = rows[r];
+                    if (!row) continue;
+                    
+                    const code = row[nameColIdx];
+                    let cost = parseFloat(row[costColIdx]);
+
+                    // Skip rows with missing product code or invalid/zero cost
+                    if (code === undefined || code === null || String(code).trim() === '') continue;
+                    if (isNaN(cost)) cost = 0; // Fallback to 0
+
+                    items.push({
+                        code: String(code).trim(),
+                        cost: cost,
+                        rowIdx: r,
+                        originalRow: row, // Preserved for exporting exactly
+                        nameColIdx: nameColIdx,
+                        costColIdx: costColIdx
+                    });
+                }
+
+                if (items.length > 0) {
+                    productsData[sheetName] = items;
+                }
+            });
+
+            // Update Zone State
+            const zone = document.getElementById('productsDropZone');
+            zone.classList.add('success');
+            document.getElementById('prodTitle').innerText = '速賣通產品資料載入成功！';
+            const fileInfo = document.getElementById('productsFileInfo');
+            let totalProd = 0;
+            Object.values(productsData).forEach(arr => totalProd += arr.length);
+            fileInfo.innerText = `已讀取 ${Object.keys(productsData).length} 個工作表，共 ${totalProd} 筆商品。`;
+            fileInfo.style.display = 'block';
+
+            // Populate tabs
+            buildSheetTabs();
+            checkVerificationAndShowDashboard();
+            return true;
+        } catch (err) {
+            console.error(err);
+            alert('解析速賣通價格計算工具.xlsx失敗！請確保檔案格式正確。');
+            return false;
+        }
+    }
+
+    // Auto-load Excel files on page load (if served under HTTP server)
+    async function autoLoadExcelFiles() {
+        const shipTitle = document.getElementById('shipTitle');
+        const prodTitle = document.getElementById('prodTitle');
+        const originalShipTitle = shipTitle.innerText;
+        const originalProdTitle = prodTitle.innerText;
+
+        shipTitle.innerHTML = `<span class="spinner"></span> 正在自動讀取「無憂標準.xlsx」...`;
+        prodTitle.innerHTML = `<span class="spinner"></span> 正在自動讀取「速賣通價格計算工具.xlsx」...`;
+
+        let shipLoaded = false;
+        let prodLoaded = false;
+
+        try {
+            // Fetch 無憂標準.xlsx
+            const shipResponse = await fetch('./無憂標準.xlsx');
+            if (shipResponse.ok) {
+                const shipBuf = await shipResponse.arrayBuffer();
+                shipLoaded = parseShippingData(shipBuf);
+            } else {
+                console.warn('無法自動載入 無憂標準.xlsx, status:', shipResponse.status);
+            }
+        } catch (err) {
+            console.warn('自動載入 無憂標準.xlsx 被 CORS 攔截或檔案不存在:', err);
+        }
+
+        try {
+            // Fetch 速賣通價格計算工具.xlsx
+            const prodResponse = await fetch('./速賣通價格計算工具.xlsx');
+            if (prodResponse.ok) {
+                const prodBuf = await prodResponse.arrayBuffer();
+                prodLoaded = parseProductsData(prodBuf);
+            } else {
+                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodResponse.status);
+            }
+        } catch (err) {
+            console.warn('自動載入 速賣通價格計算工具.xlsx 被 CORS 攔截或檔案不存在:', err);
+        }
+
+        // If autoload failed (CORS blocks under file:/// scheme or files missing)
+        if (!shipLoaded || !prodLoaded) {
+            // Revert titles if they didn't load
+            if (!shipLoaded) {
+                shipTitle.innerText = originalShipTitle;
+            }
+            if (!prodLoaded) {
+                prodTitle.innerText = originalProdTitle;
+            }
+
+            // If we are running under file:/// protocol, display a helpful tip to the user
+            if (window.location.protocol === 'file:') {
+                showCORSAlert();
+            }
+        } else {
+            showToast('已成功自動載入本地 Excel 數據！');
+        }
+    }
+
+    // Show CORS security instructions
+    function showCORSAlert() {
+        const alertBox = document.getElementById('corsAlert');
+        if (alertBox) {
+            alertBox.style.display = 'block';
+        }
     }
 
     function buildSheetTabs() {
