@@ -855,14 +855,33 @@
     </div>
 
     <!-- Single Product Manual Calculator -->
-    <div class="glass-card" style="border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.02); margin-bottom: 1.5rem;">
+    <div class="glass-card" style="border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.02); margin-bottom: 1.5rem; position: relative; z-index: 50;">
         <h2 style="font-size:1.15rem; font-family:'Outfit',sans-serif; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem; color: var(--accent-green);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-green);">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
             📊 單件商品手動快速試算區 (無須匯入 Excel 即可使用)
         </h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div class="input-group" style="position: relative;">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">試算目的地國家</label>
+                <div class="custom-dropdown" id="manualCountryDropdownContainer">
+                    <div class="dropdown-trigger" id="manualCountryDropdownTrigger" style="background: #ffffff !important; color: #000000 !important; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; height: 38px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <span>選擇國家...</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 1.1rem; height: 1.1rem; stroke: #000000;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div class="dropdown-menu" id="manualCountryDropdownMenu" style="display: none; background: rgba(15, 23, 42, 0.98); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.6rem; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: absolute; top: calc(100% + 6px); left: 0; right: 0; display: flex; flex-direction: column; gap: 0.4rem; min-width: 220px;">
+                        <div class="dropdown-search-container">
+                            <input type="text" id="manualCountrySearch" placeholder="搜尋國家 (中文/英文)..." oninput="handleManualCountrySearch(this.value)" style="width: 100%; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 6px; padding: 0.4rem 0.6rem; color: #fff; font-size: 0.8rem; outline: none;">
+                        </div>
+                        <div class="dropdown-items" id="manualCountryDropdownItems" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">商品採購成本 (RMB)</label>
                 <input type="number" id="manualCost" class="input-control" value="40" step="1" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
@@ -882,6 +901,12 @@
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">對手含運售價 (USD - 選填)</label>
                 <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="試算對手利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <div class="input-group" style="justify-content: center; align-items: flex-start; height: 100%;">
+                <label style="display: flex; align-items: center; gap: 0.45rem; cursor: pointer; user-select: none; margin-top: 1.35rem;">
+                    <input type="checkbox" id="manualMergeShippingToggle" checked onchange="toggleManualMergeShipping()" style="width: 16px; height: 16px; accent-color: var(--accent-green); cursor: pointer;">
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #fff;">將運費併入售價</span>
+                </label>
             </div>
         </div>
         
@@ -1148,6 +1173,10 @@
     let selectedComparativeCountries = new Set(['US']); // Multiselect comparative set
     let countrySearchQuery = '';                // Dropdown list search text
 
+    // Manual Calculator country dropdown selection state
+    let manualPrimaryCountry = 'US';
+    let manualCountrySearchQuery = '';
+
     // Object storing item overrides: key is `${sheetName}_${productCode}`
     // structure: { weight: null, margin: null, activityDiscount: null }
     let itemOverrides = {};
@@ -1169,6 +1198,7 @@
         setupDragAndDrop();
         setupFileSelectors();
         setupDropdownTrigger();
+        setupManualDropdownTrigger();
         calculateManualPrice(); // Compute manual calculator default state
         autoLoadExcelFiles();
     });
@@ -1218,6 +1248,25 @@
     function setupDropdownTrigger() {
         const trigger = document.getElementById('countryDropdownTrigger');
         const menu = document.getElementById('countryDropdownMenu');
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = menu.style.display === 'flex';
+            menu.style.display = isOpen ? 'none' : 'flex';
+            trigger.classList.toggle('open', !isOpen);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && e.target !== trigger) {
+                menu.style.display = 'none';
+                trigger.classList.remove('open');
+            }
+        });
+    }
+
+    function setupManualDropdownTrigger() {
+        const trigger = document.getElementById('manualCountryDropdownTrigger');
+        const menu = document.getElementById('manualCountryDropdownMenu');
 
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1314,13 +1363,16 @@
             // Check if US is available to set defaults
             if (rates['US']) {
                 primaryCountry = 'US';
+                manualPrimaryCountry = 'US';
                 selectedComparativeCountries = new Set(['US']);
             } else {
                 primaryCountry = Object.keys(rates)[0];
+                manualPrimaryCountry = primaryCountry;
                 selectedComparativeCountries = new Set([primaryCountry]);
             }
 
             populateCountryDropdown();
+            populateManualCountryDropdown();
             checkVerificationAndShowDashboard();
             calculateManualPrice(); // recalculate with new rates
             return true;
@@ -1380,6 +1432,82 @@
         updateDropdownTriggerText();
     }
 
+    // Populate the searchable dropdown inside the top manual calculator
+    function populateManualCountryDropdown() {
+        const itemsContainer = document.getElementById('manualCountryDropdownItems');
+        if (!itemsContainer || !shippingRates) return;
+        
+        itemsContainer.innerHTML = '';
+        const countriesList = Object.values(shippingRates).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+        
+        // Filter countries if search query exists
+        const filteredList = countriesList.filter(c => {
+            if (!manualCountrySearchQuery) return true;
+            const query = manualCountrySearchQuery.toLowerCase();
+            return c.name.toLowerCase().includes(query) || c.englishName.toLowerCase().includes(query) || c.code.toLowerCase().includes(query);
+        });
+
+        filteredList.forEach(c => {
+            const div = document.createElement('div');
+            div.className = `dropdown-item ${c.code === manualPrimaryCountry ? 'active-primary' : ''}`;
+            div.style.padding = '0.35rem 0.5rem';
+            
+            const labelContainer = document.createElement('div');
+            labelContainer.className = 'dropdown-item-label';
+            labelContainer.innerHTML = `
+                <span>${c.name} (${c.englishName})</span>
+                ${c.code === manualPrimaryCountry ? '<span class="primary-badge" style="background: var(--accent-green);">已選</span>' : ''}
+            `;
+            
+            div.appendChild(labelContainer);
+
+            div.addEventListener('click', () => {
+                setManualPrimaryCountry(c.code);
+                document.getElementById('manualCountryDropdownMenu').style.display = 'none';
+                document.getElementById('manualCountryDropdownTrigger').classList.remove('open');
+            });
+
+            itemsContainer.appendChild(div);
+        });
+
+        updateManualDropdownTriggerText();
+    }
+
+    function handleManualCountrySearch(val) {
+        manualCountrySearchQuery = val.trim();
+        populateManualCountryDropdown();
+    }
+
+    function setManualPrimaryCountry(code) {
+        manualPrimaryCountry = code;
+        populateManualCountryDropdown();
+        calculateManualPrice();
+    }
+
+    function updateManualDropdownTriggerText() {
+        const trigger = document.getElementById('manualCountryDropdownTrigger').querySelector('span');
+        if (!shippingRates || !shippingRates[manualPrimaryCountry]) {
+            trigger.innerText = '選擇國家...';
+            return;
+        }
+
+        const name = shippingRates[manualPrimaryCountry].name;
+        trigger.innerText = `${name} (${manualPrimaryCountry})`;
+    }
+
+    function toggleManualMergeShipping() {
+        const topCheckbox = document.getElementById('manualMergeShippingToggle');
+        excludeShippingFee = !topCheckbox.checked;
+        
+        // Synchronize with bottom parameter toggle
+        const bottomToggle = document.getElementById('excludeShippingToggle');
+        if (bottomToggle) {
+            bottomToggle.checked = excludeShippingFee;
+        }
+        
+        updateGlobalSettings();
+    }
+
     function handleCountrySearch(val) {
         countrySearchQuery = val.trim();
         populateCountryDropdown();
@@ -1400,6 +1528,10 @@
         primaryCountry = code;
         selectedComparativeCountries.add(code); // ensure primary is also in comparative list
         populateCountryDropdown();
+        
+        // Sync manual country dropdown at the top
+        setManualPrimaryCountry(code);
+        
         renderTable();
         calculateManualPrice();
     }
@@ -1593,6 +1725,13 @@
     // Pricing option toggle for Exclude Shipping
     function toggleExcludeShipping() {
         excludeShippingFee = document.getElementById('excludeShippingToggle').checked;
+        
+        // Synchronize with top toggle
+        const topCheckbox = document.getElementById('manualMergeShippingToggle');
+        if (topCheckbox) {
+            topCheckbox.checked = !excludeShippingFee;
+        }
+        
         renderTable();
         calculateManualPrice();
     }
@@ -1668,9 +1807,11 @@
         const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
         const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
 
+        // Determine selected country for manual calculator
+        const selectedCountryCode = manualPrimaryCountry;
         const targetMargin = isNaN(manualMarginVal) ? 0.20 : (manualMarginVal / 100);
         const targetMargPercentage = isNaN(manualMarginVal) ? 20 : manualMarginVal;
-        const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
+        const shippingRMB = calculateBaseShippingRMB(selectedCountryCode, weight, isSpecialCargo);
         const totalCostRMB = cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
         // Suggested formulas
@@ -1696,7 +1837,7 @@
             <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準運費</div>
                 <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[primaryCountry].name} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
             </div>
             <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含手續報關)</div>
@@ -1725,24 +1866,50 @@
             </div>
         `;
 
-        // If competitor price entered, calculate competitor profit
+        // If competitor price entered, calculate competitor profit and your pricing comparison
         if (!isNaN(competitorUSD) && competitorUSD > 0) {
+            // 1. Competitor reverse calculations
             const competitorRMB = competitorUSD * exchRate;
             const competitorFeeRMB = competitorRMB * (platformFeeRate / 100);
             const competitorNetRevenueRMB = competitorRMB - competitorFeeRMB;
             const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
             const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
-            const isPositive = competitorProfitRMB >= 0;
-            const profitColor = isPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
+            const isCompPositive = competitorProfitRMB >= 0;
+            const compProfitColor = isCompPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
+
+            // 2. Your pricing calculations
+            const yourFeeRMB = saleRMB * (platformFeeRate / 100);
+            const yourNetRevenueRMB = saleRMB - yourFeeRMB;
+            const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
+            const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
+            const isYourPositive = yourProfitRMB >= 0;
+            const yourProfitColor = isYourPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
 
             html += `
-                <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                    <div style="font-size: 0.82rem; font-weight: 600; color: var(--accent-cyan);">⚔️ 對手利潤逆推試算結果:</div>
-                    <div style="display: flex; gap: 1.5rem; font-size: 0.85rem;">
-                        <div>對手售價: <strong style="color: #fff;">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
-                        <div>對手佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
-                        <div>對手淨利潤: <strong style="color: ${profitColor};">${isPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</strong></div>
-                        <div>對手實際利潤率: <strong style="color: ${profitColor};">${competitorProfitRate.toFixed(2)}%</strong></div>
+                <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                    <!-- Competitor Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(236, 72, 153, 0.04); padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid rgba(236, 72, 153, 0.15);">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-pink); display: flex; align-items: center; gap: 0.25rem;">
+                            ⚔️ 競爭對手定價分析:
+                        </div>
+                        <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
+                            <div>對手售價: <strong style="color: #fff;">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
+                            <div>對手佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
+                            <div>對手淨利潤: <strong style="color: ${compProfitColor};">${isCompPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</strong></div>
+                            <div>對手實際利潤率: <strong style="color: ${compProfitColor};">${competitorProfitRate.toFixed(2)}%</strong></div>
+                        </div>
+                    </div>
+                    <!-- Your Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(16, 185, 129, 0.04); padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.15);">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-green); display: flex; align-items: center; gap: 0.25rem;">
+                            🛡️ 您的建議定價對比:
+                        </div>
+                        <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
+                            <div>您的售價: <strong style="color: #fff;">$${saleUSD.toFixed(2)} (¥${saleRMB.toFixed(2)})</strong></div>
+                            <div>您的佣金: <strong style="color: var(--text-muted);">¥${yourFeeRMB.toFixed(2)}</strong></div>
+                            <div>您的淨利潤: <strong style="color: ${yourProfitColor};">${isYourPositive ? '¥' : '-¥'}${Math.abs(yourProfitRMB).toFixed(2)}</strong></div>
+                            <div>您的實際利潤率: <strong style="color: ${yourProfitColor};">${yourProfitRate.toFixed(2)}%</strong></div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1904,7 +2071,7 @@
         const tableBody = document.getElementById('tableBody');
 
         if (!shippingRates || !primaryCountry) {
-            tableBody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">⚠️ 請先在上方「目的地國家/地區」中選擇或勾選國家以開啟計算。</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="13" style="text-align: center; padding: 3rem; color: var(--text-muted);">⚠️ 請先在上方「目的地國家/地區」中選擇或勾選國家以開啟計算。</td></tr>`;
             document.getElementById('paginationInfo').innerText = '顯示第 0 至 0 筆，共 0 筆';
             document.getElementById('paginationControls').innerHTML = '';
             return;
@@ -1921,7 +2088,7 @@
 
         const totalItems = filteredItems.length;
         if (totalItems === 0) {
-            tableBody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">🔍 找不到與「${searchQuery}」匹配的商品。</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="13" style="text-align: center; padding: 3rem; color: var(--text-muted);">🔍 找不到與「${searchQuery}」匹配的商品。</td></tr>`;
             document.getElementById('paginationInfo').innerText = '顯示第 0 至 0 筆，共 0 筆';
             document.getElementById('paginationControls').innerHTML = '';
             return;
@@ -2048,19 +2215,65 @@
                         <input type="number" class="table-input" step="0.01" min="0" value="${competitorPriceUSD.toFixed(2)}" 
                             onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:80px; border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05);">
                     </td>
+                    <td style="text-align: right; padding-right: 0.8rem; color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</td>
                     <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; ${profitColorStyle}">${profitSymbol}${absProfitVal}</td>
                     <td class="highlight-text" style="text-align: center; ${profitColorStyle}">${competitorProfitRate.toFixed(2)}%</td>
-                    <td style="color:var(--text-muted); font-size:0.75rem; text-align:center;">-</td>
+                    <td style="text-align: center;">
+                        <span class="badge badge-cyan" style="background: rgba(236,72,153,0.15); color: #ec4899; border: 1px solid rgba(236,72,153,0.3);">⚔️ 對手</span>
+                    </td>
+                `;
+
+                // Generate your suggested pricing row directly underneath
+                let trYour = document.createElement('tr');
+                trYour.id = `row-your-${itemKey}`;
+                trYour.style.borderBottom = '1px solid rgba(255, 255, 255, 0.12)';
+                
+                const yourFeeRMB = salePriceRMB * (platformFeeRate / 100);
+                const yourNetRevenueRMB = salePriceRMB - yourFeeRMB;
+                const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
+                const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
+                
+                const isYourPositive = yourProfitRMB >= 0;
+                const yourProfitColorStyle = isYourPositive ? 'color: #10b981;' : 'color: #ec4899;';
+                const yourProfitSymbol = isYourPositive ? '¥' : '-¥';
+                const absYourProfitVal = Math.abs(yourProfitRMB).toFixed(2);
+                
+                trYour.innerHTML = `
+                    <td colspan="7" style="text-align: right; font-weight: 700; color: var(--accent-green); background: rgba(16, 185, 129, 0.03); padding-right: 1.2rem;">
+                        🛡️ 您的建議定價對比:
+                    </td>
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(16, 185, 129, 0.03);">
+                        ¥${salePriceRMB.toFixed(2)}
+                        ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
+                    </td>
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(16, 185, 129, 0.03);">
+                        $${salePriceUSD.toFixed(2)}
+                    </td>
+                    <td style="text-align: right; padding-right: 0.8rem; color: var(--text-muted); background: rgba(16, 185, 129, 0.03);">
+                        ¥${yourFeeRMB.toFixed(2)}
+                    </td>
+                    <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; ${yourProfitColorStyle} background: rgba(16, 185, 129, 0.03);">
+                        ${yourProfitSymbol}${absYourProfitVal}
+                    </td>
+                    <td class="highlight-text" style="text-align: center; ${yourProfitColorStyle} background: rgba(16, 185, 129, 0.03);">
+                        ${yourProfitRate.toFixed(2)}%
+                    </td>
+                    <td style="text-align: center; background: rgba(16, 185, 129, 0.03);">
+                        <span class="badge badge-purple" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);">🛡️ 您的建議</span>
+                    </td>
                 `;
             }
             tableBody.appendChild(tr);
+            if (currentViewMode === 'competitor') {
+                tableBody.appendChild(trYour);
+            }
 
             // Item Expand Row (Sub-table)
             const expTr = document.createElement('tr');
             expTr.id = `row-exp-${itemKey}`;
             expTr.style.display = isExpanded ? 'table-row' : 'none';
             expTr.innerHTML = `
-                <td colspan="12" style="padding: 0.4rem 0.75rem; background: rgba(15, 23, 42, 0.45);">
+                <td colspan="13" style="padding: 0.4rem 0.75rem; background: rgba(15, 23, 42, 0.45);">
                     <div style="border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden; background: rgba(10, 15, 26, 0.9); padding: 0.4rem;">
                         <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.3rem;">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px; height:14px; stroke:var(--accent-cyan);">
@@ -2242,10 +2455,11 @@
                     <th>商品重量 (KG)</th>
                     <th>無憂運費 (RMB)</th>
                     <th>總成本 (RMB)</th>
-                    <th>對手含運售價 (RMB)</th>
-                    <th>對手含運售價 (USD)</th>
-                    <th>對手淨利潤 (RMB)</th>
-                    <th>對手實際利潤率 (%)</th>
+                    <th>售價 (RMB)</th>
+                    <th>售價 (USD)</th>
+                    <th>平台佣金 (RMB)</th>
+                    <th>淨利潤 (RMB)</th>
+                    <th>實際利潤率 (%)</th>
                     <th style="text-align: center;">說明</th>
                 </tr>
             `;
@@ -2336,13 +2550,18 @@
                         newHeaders.push("實際利潤率(%)");
                     } else {
                         newHeaders.push("計費重量(KG)");
-                        newHeaders.push("無憂標準運費(RMB)");
+                        newHeaders.push("無憂運費(RMB)");
                         newHeaders.push("總成本(RMB)");
-                        newHeaders.push("對手含運售價(RMB)");
-                        newHeaders.push("對手含運售價(USD)");
-                        newHeaders.push("對手平台佣金(RMB)");
+                        newHeaders.push("對手售價(RMB)");
+                        newHeaders.push("對手售價(USD)");
+                        newHeaders.push("對手佣金(RMB)");
                         newHeaders.push("對手淨利潤(RMB)");
                         newHeaders.push("對手實際利潤率(%)");
+                        newHeaders.push("您的建議售價(RMB)");
+                        newHeaders.push("您的建議售價(USD)");
+                        newHeaders.push("您的建議佣金(RMB)");
+                        newHeaders.push("您的建議淨利潤(RMB)");
+                        newHeaders.push("您的建議實際利潤率(%)");
                     }
 
                     sheetRows[1] = newHeaders;
@@ -2394,6 +2613,11 @@
                             const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
                             const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
 
+                            const yourFeeRMB = salePriceRMB * (platformFeeRate / 100);
+                            const yourNetRevenueRMB = salePriceRMB - yourFeeRMB;
+                            const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
+                            const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
+
                             originalRowCopy.push(weight);
                             originalRowCopy.push(shippingRMB);
                             originalRowCopy.push(totalCostRMB);
@@ -2402,6 +2626,11 @@
                             originalRowCopy.push(competitorFeeRMB);
                             originalRowCopy.push(competitorProfitRMB);
                             originalRowCopy.push(competitorProfitRate.toFixed(2) + "%");
+                            originalRowCopy.push(salePriceRMB);
+                            originalRowCopy.push(salePriceUSD);
+                            originalRowCopy.push(yourFeeRMB);
+                            originalRowCopy.push(yourProfitRMB);
+                            originalRowCopy.push(yourProfitRate.toFixed(2) + "%");
                         }
 
                         sheetRows[rIdx] = originalRowCopy;
