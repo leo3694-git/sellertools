@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速賣通跨境定價與無憂標準運費計算系統</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SheetJS (xlsx) via jsDelivr CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(17, 25, 40, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-pink: #ec4899;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --table-header-bg: #111827;
+            --table-row-hover: rgba(139, 92, 246, 0.08);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --card-radius: 16px;
+            --transition-speed: 0.25s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #17122a, #0b0f19 60%, #07090d);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            overflow-x: hidden;
+        }
+
+        /* Container & Layout */
+        .container {
+            max-width: 1450px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Glassmorphic Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--card-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.1);
+        }
+
+        /* Drag & Drop Upload State */
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(139, 92, 246, 0.4);
+            border-radius: var(--card-radius);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(17, 25, 40, 0.35);
+            transition: all var(--transition-speed);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
+        }
+
+        .drop-zone.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .drop-zone svg {
+            width: 44px;
+            height: 44px;
+            margin-bottom: 1rem;
+            stroke: var(--primary);
+            transition: transform var(--transition-speed);
+        }
+
+        .drop-zone:hover svg {
+            transform: scale(1.1);
+            stroke: var(--accent-cyan);
+        }
+
+        .drop-zone.success svg {
+            stroke: var(--accent-green);
+        }
+
+        .drop-zone h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .drop-zone p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .file-info {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            font-weight: 500;
+            display: none;
+        }
+
+        /* Config Grid Panel */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-control {
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            transition: all var(--transition-speed);
+            width: 100%;
+        }
+
+        .input-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        select.input-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f3f4f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            padding-right: 2.5rem;
+        }
+
+        /* Toggle Button Group */
+        .toggle-group {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 2px;
+            width: 100%;
+            height: 43px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all var(--transition-speed);
+        }
+
+        .toggle-btn.active {
+            background: var(--primary);
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Tabs Styling */
+        .tab-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            max-width: 100%;
+        }
+
+        .tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        .tabs::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all var(--transition-speed);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: var(--text-main);
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        /* Bulk Action & Search Panel */
+        .search-bulk-panel {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .search-wrapper svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-muted);
+        }
+
+        .search-input {
+            padding-left: 2.8rem !important;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: var(--text-main);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all var(--transition-speed);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+            outline: none;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-cyan {
+            background: var(--accent-cyan);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-cyan:hover {
+            background: #0891b2;
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.35);
+        }
+
+        .btn:disabled {
+            background: #4b5563 !important;
+            color: #9ca3af !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+
+        /* Advanced Grid Table scroll view */
+        .table-container {
+            width: 100%;
+            max-height: 600px; /* Frozen Header vertical height limit */
+            overflow-y: auto;  /* Vertical scroll enable */
+            overflow-x: auto;  /* Horizontal scroll enable */
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(10, 15, 26, 0.6);
+            margin-bottom: 1.5rem;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0.85rem 1rem;
+        }
+
+        th {
+            background: var(--table-header-bg) !important; /* Solid dark background to prevent scrolled content overlay */
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.18) !important;
+            white-space: nowrap;
+            
+            /* Sticky Header Row Configuration */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            color: #d1d5db;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        tr {
+            transition: background var(--transition-speed);
+        }
+
+        tr:hover {
+            background: var(--table-row-hover);
+        }
+
+        /* Inline Table Inputs */
+        .table-input {
+            width: 75px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 0.35rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: all var(--transition-speed);
+        }
+
+        .table-input:focus {
+            border-color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+            box-shadow: 0 0 6px var(--primary-glow);
+        }
+
+        /* Specialized Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-purple {
+            background: rgba(139, 92, 246, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* Calculated Highlight Styles */
+        .highlight-text {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .highlight-purple {
+            color: #a78bfa;
+        }
+
+        .highlight-cyan {
+            color: #22d3ee;
+        }
+
+        .highlight-green {
+            color: #34d399;
+        }
+
+        /* Pagination Layout */
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.35rem;
+            align-items: center;
+        }
+
+        .page-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            min-width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed);
+        }
+
+        .page-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: var(--text-main);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Specific High-Legibility Country Selector Style */
+        #globalCountry {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23000000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+        }
+        
+        #globalCountry option {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
+
+        /* Hide dashboard before files loaded */
+        .dashboard-content {
+            display: none;
+        }
+
+        /* Drag & Drop Mask overlay */
+        .drag-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 15, 25, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            border: 4px dashed var(--primary);
+            backdrop-filter: blur(8px);
+        }
+
+        .drag-mask h2 {
+            font-size: 2rem;
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border-left-color: var(--text-main);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(16, 185, 129, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            font-weight: 600;
+            z-index: 2000;
+            display: none;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(1rem); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="drag-mask" id="dragMask">
+    <h2>釋放滑鼠以匯入 Excel 檔案</h2>
+</div>
+
+<div class="container">
+    <header>
+        <h1>速賣通跨境定價與運費計算系統</h1>
+        <p>提供 AliExpress Standard Shipping（無憂標準）國家運費精確試算，多工作表批量調整與 XLS 導出</p>
+    </header>
+
+    <!-- Pricing Formula Display Card -->
+    <div class="glass-card" style="padding: 1.25rem 2rem; margin-bottom: 2rem; border-color: rgba(139, 92, 246, 0.25); background: rgba(139, 92, 246, 0.03);">
+        <h3 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-cyan); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; stroke: var(--accent-cyan);">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            速賣通官方標準定價公式說明
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; font-size: 0.88rem; line-height: 1.6;">
+            <div style="border-left: 3px solid var(--accent-green); padding-left: 1rem;">
+                <strong style="color: var(--accent-green);">1. 買家實付【特價 (USD)】</strong>：涵蓋全部成本，保證您的目標實際利潤率
+                <div style="font-family: 'Outfit', monospace; font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
+                    特價 (USD) = [ 總成本 × (1 + 實際利潤%) ] ÷ [ 匯率 × (1 - 平台費率%) ]
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
+                    * 總成本 = 進貨價 + 國內運費 + 無憂標準運費 + 海關報關費
+                </div>
+            </div>
+            <div style="border-left: 3px solid var(--primary); padding-left: 1rem;">
+                <strong style="color: #c084fc;">2. 促銷刊登【零售價 (USD)】</strong>：逆推刊登零售價，確保折後剛好等於特價
+                <div style="font-family: 'Outfit', monospace; font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
+                    零售價 (USD) = 特價 (USD) ÷ [ 1 - (活動折扣% + 額外折扣%) / 100 ]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Drop Zones -->
+    <div class="upload-section">
+        <!-- Shipping Database -->
+        <div class="drop-zone" id="shippingDropZone">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 id="shipTitle">1. 匯入「無憂標準.xlsx」</h3>
+            <p>點擊選取或拖入 AliExpress 官方國家運費報價單</p>
+            <div class="file-info" id="shippingFileInfo">已讀取 250+ 國家運費資料</div>
+            <input type="file" id="shippingFileInput" style="display:none" accept=".xlsx, .xls">
+        </div>
+
+        <!-- Product Database -->
+        <div class="drop-zone" id="productsDropZone">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 id="prodTitle">2. 匯入「速賣通價格計算工具.xlsx」</h3>
+            <p>點擊選取或拖入包含商品型號及成本的產品表</p>
+            <div class="file-info" id="productsFileInfo">已讀取 8 個工作表資料</div>
+            <input type="file" id="productsFileInput" style="display:none" accept=".xlsx, .xls">
+        </div>
+    </div>
+
+    <!-- Main Dashboard - Visible after files loaded -->
+    <div class="dashboard-content" id="dashboard">
+        <!-- Global Parameter Settings Card -->
+        <div class="glass-card">
+            <h2 style="font-size:1.3rem; font-family:'Outfit',sans-serif; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:22px; height:22px; stroke:var(--accent-cyan);">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                全球核心參數設定
+            </h2>
+            <div class="config-grid">
+                <!-- Country Dropdown -->
+                <div class="input-group">
+                    <label>目的地國家/地區</label>
+                    <select class="input-control" id="globalCountry">
+                        <option value="">選擇國家...</option>
+                    </select>
+                </div>
+
+                <!-- Goods Type -->
+                <div class="input-group">
+                    <label>物流貨物類型</label>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" id="typeGeneral" onclick="setCargoType(false)">普貨 (小包)</button>
+                        <button class="toggle-btn" id="typeSpecial" onclick="setCargoType(true)">非普貨 (含電)</button>
+                    </div>
+                </div>
+
+                <!-- Default Weight (kg) -->
+                <div class="input-group">
+                    <label>商品預設重量 (KG)</label>
+                    <input type="number" class="input-control" id="defaultWeight" value="0.04" step="0.01" min="0.001" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Domestic Shipping (RMB) -->
+                <div class="input-group">
+                    <label>預設國內運費 (RMB)</label>
+                    <input type="number" class="input-control" id="domesticShipping" value="0" step="0.1" min="0" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Customs Declaration Fee (RMB) -->
+                <div class="input-group">
+                    <label>預設海關報關費 (RMB)</label>
+                    <input type="number" class="input-control" id="customsFee" value="0" step="0.1" min="0" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Platform Fee Rate (%) -->
+                <div class="input-group">
+                    <label>預設平台費率 (%)</label>
+                    <input type="number" class="input-control" id="platformFeeRate" value="10" step="0.1" min="0" max="99" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Default Activity Campaign Discount (%) -->
+                <div class="input-group">
+                    <label>預設活動折扣 (%)</label>
+                    <input type="number" class="input-control" id="defaultActivityDiscount" value="15" step="1" min="0" max="100" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Shipping Extra Discount (%) -->
+                <div class="input-group">
+                    <label>無憂額外折扣 (%) (選填)</label>
+                    <input type="number" class="input-control" id="extraDiscount" value="0" step="1" min="0" max="100" placeholder="例如: 5" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Target Profit Margin (%) -->
+                <div class="input-group">
+                    <label>預設實際利潤 (%)</label>
+                    <input type="number" class="input-control" id="targetMargin" value="20" step="1" min="-99" max="99" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- USD Exchange Rate -->
+                <div class="input-group">
+                    <label>美金匯率 (RMB/USD)</label>
+                    <input type="number" class="input-control" id="exchangeRate" value="7.2" step="0.01" min="1" oninput="updateGlobalSettings()">
+                </div>
+            </div>
+        </div>
+
+        <!-- View Mode Toggle -->
+        <div class="glass-card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.02);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-cyan);">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span style="font-size: 1.05rem; font-weight: 700; font-family:'Outfit',sans-serif; color: #fff; letter-spacing: 0.5px;">系統功能模式</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 4px; border-radius: 30px; width: fit-content;">
+                <button id="viewPricingBtn" class="tab-btn active" onclick="setViewMode('pricing')" style="border: none; padding: 0.5rem 1.5rem; font-size: 0.88rem; border-radius: 20px;">📊 跨境定價與批量試算</button>
+                <button id="viewCompetitorBtn" class="tab-btn" onclick="setViewMode('competitor')" style="border: none; padding: 0.5rem 1.5rem; font-size: 0.88rem; border-radius: 20px;">⚔️ 競爭對手利潤分析</button>
+            </div>
+        </div>
+
+        <!-- Sheet Selector, Search & Bulk Export Actions -->
+        <div class="tab-section">
+            <div class="tabs" id="sheetTabs">
+                <!-- Populated dynamically -->
+            </div>
+            
+            <div class="search-bulk-panel">
+                <div class="search-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" class="input-control search-input" id="searchBar" placeholder="搜尋商品編號..." oninput="handleSearch()">
+                </div>
+
+                <!-- Reset Settings Button -->
+                <button class="btn btn-cyan" onclick="resetAllOverrides()" title="將所有手動微調過的價格/利潤/重量與活動折扣重置為全球核心參數">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1-2 3.472M20 20v-5h-.581m0 0a8.003 8.003 0 01-15.357-2" />
+                    </button>
+                    重置為全域參數
+                </button>
+
+                <!-- Bulk Export Button -->
+                <button class="btn" id="exportBtn" onclick="exportCalculations()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    批量匯出 Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Product Pricing Table Card -->
+        <div class="glass-card" style="padding: 1.25rem;">
+            <div class="table-container">
+                <table id="productTable">
+                    <thead id="tableHeader">
+                        <tr>
+                            <th>商品工作表</th>
+                            <th>商品編號</th>
+                            <th>採購成本 (RMB)</th>
+                            <th>商品重量 (KG)</th>
+                            <th>活動折扣 (%)</th>
+                            <th>無憂標準運費 (RMB)</th>
+                            <th>實際利潤 (%)</th>
+                            <th>特價 (RMB)</th>
+                            <th>特價 (USD)</th>
+                            <th>零售價 (RMB)</th>
+                            <th>零售價 (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="11" style="text-align: center; padding: 3rem; color: var(--text-muted);">選擇國家並等待表格數據渲染...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Pagination -->
+            <div class="pagination-container">
+                <div class="pagination-info" id="paginationInfo">顯示第 0 至 0 筆，共 0 筆</div>
+                <div class="pagination-controls" id="paginationControls">
+                    <!-- Pagination buttons -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">保存成功</div>
+
+<script>
+    // Global State
+    let shippingRates = null;     // Country shipping databases
+    let productsData = {};        // Sheet mapping arrays of products
+    let currentSheet = '';        // Selected Excel sheet tab name
+    let searchQuery = '';         // Selected filter keyword
+    let currentPage = 1;          // Pagination index
+    const itemsPerPage = 50;      // Rows size for smoothness
+
+    // Object storing item overrides: key is `${sheetName}_${productCode}`
+    // structure: { weight: null, margin: null, activityDiscount: null }
+    let itemOverrides = {};
+
+    let isSpecialCargo = false;  // Toggle between General and Special Cargo
+
+    // Competitor Analysis State
+    let currentViewMode = 'pricing'; // 'pricing' or 'competitor'
+    let competitorPrices = {};       // Stores competitor USD prices: key is `${sheetName}_${productCode}`
+
+    // Event Bindings for Drag & Drop / Selection
+    document.addEventListener('DOMContentLoaded', () => {
+        setupDragAndDrop();
+        setupFileSelectors();
+    });
+
+    function setupDragAndDrop() {
+        const dragMask = document.getElementById('dragMask');
+        
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragMask.style.display = 'flex';
+        });
+
+        dragMask.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragMask.style.display = 'none';
+        });
+
+        dragMask.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        dragMask.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragMask.style.display = 'none';
+            
+            const files = e.dataTransfer.files;
+            handleDroppedFiles(files);
+        });
+    }
+
+    function setupFileSelectors() {
+        // Shipping File Selector click trigger
+        const shipZone = document.getElementById('shippingDropZone');
+        const shipInput = document.getElementById('shippingFileInput');
+        shipZone.addEventListener('click', () => shipInput.click());
+        shipInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleShippingFile(e.target.files[0]);
+        });
+
+        // Products File Selector click trigger
+        const prodZone = document.getElementById('productsDropZone');
+        const prodInput = document.getElementById('productsFileInput');
+        prodZone.addEventListener('click', () => prodInput.click());
+        prodInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleProductsFile(e.target.files[0]);
+        });
+    }
+
+    function handleDroppedFiles(files) {
+        let shipFile = null;
+        let prodFile = null;
+
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            if (f.name.includes('無憂標準')) {
+                shipFile = f;
+            } else if (f.name.includes('價格計算') || f.name.includes('速賣通')) {
+                prodFile = f;
+            } else {
+                // Heuristic mapping by size
+                if (f.size < 500000) shipFile = f; // Shipping spreadsheet is tiny (<500kb)
+                else prodFile = f;                 // Product database is larger
+            }
+        }
+
+        if (shipFile) handleShippingFile(shipFile);
+        if (prodFile) handleProductsFile(prodFile);
+    }
+
+    // Parse "無憂標準.xlsx" Shipping Rates
+    function handleShippingFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                // We start parsing from row index 14 onwards (Albania starts here)
+                const rates = {};
+                for (let i = 14; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length < 3) continue;
+                    
+                    const countryName = row[0];
+                    const englishName = row[1];
+                    const code = row[2];
+
+                    if (!countryName || !code) continue;
+
+                    // Extracted values per columns
+                    rates[code] = {
+                        name: String(countryName).trim(),
+                        englishName: String(englishName).trim(),
+                        code: String(code).trim(),
+                        general_0_150_ship: parseFloat(row[3]) || 0,
+                        general_0_150_reg: parseFloat(row[4]) || 0,
+                        general_150_300_ship: parseFloat(row[5]) || 0,
+                        general_150_300_reg: parseFloat(row[6]) || 0,
+                        general_300_2000_ship: parseFloat(row[7]) || 0,
+                        general_300_2000_reg: parseFloat(row[8]) || 0,
+                        special_0_2000_ship: parseFloat(row[9]) || 0,
+                        special_0_2000_reg: parseFloat(row[10]) || 0,
+                        large_first_0_5kg: parseFloat(row[11]) || 0,
+                        large_next_0_5kg: parseFloat(row[12]) || 0
+                    };
+                }
+
+                shippingRates = rates;
+                
+                // Update Zone State
+                const zone = document.getElementById('shippingDropZone');
+                zone.classList.add('success');
+                document.getElementById('shipTitle').innerText = '無憂標準運費資料載入成功！';
+                const fileInfo = document.getElementById('shippingFileInfo');
+                fileInfo.innerText = `已讀取 ${Object.keys(rates).length} 個國家/地區的配送報價。`;
+                fileInfo.style.display = 'block';
+
+                // Populate Country Select
+                populateCountryDropdown();
+                checkVerificationAndShowDashboard();
+                showToast(`已成功導入無憂標準運費資料！`);
+            } catch (err) {
+                console.error(err);
+                alert('解析無憂標準.xlsx失敗！請確保檔案格式正確。');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Populate searchable selection
+    function populateCountryDropdown() {
+        const dropdown = document.getElementById('globalCountry');
+        dropdown.innerHTML = '<option value="">選擇國家...</option>';
+
+        const countriesList = Object.values(shippingRates).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+        countriesList.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.code;
+            opt.innerText = `${c.name} (${c.englishName})`;
+            if (c.code === 'US' || c.name.includes('美国') || c.name.includes('美國')) {
+                opt.selected = true; // Default to US if available
+            }
+            dropdown.appendChild(opt);
+        });
+
+        // Event listener
+        dropdown.addEventListener('change', () => {
+            currentPage = 1;
+            renderTable();
+        });
+    }
+
+    // Parse "速賣通價格計算工具.xlsx" Product Database
+    function handleProductsFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                productsData = {};
+                itemOverrides = {};
+                competitorPrices = {};
+
+                workbook.SheetNames.forEach(sheetName => {
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    if (rows.length < 2) return; // Skip empty sheets
+
+                    const headers = rows[1]; // Index 1 has our true column headers
+                    if (!headers) return;
+
+                    let nameColIdx = 2; // Default column index heuristics
+                    let costColIdx = 3;
+
+                    headers.forEach((h, idx) => {
+                        if (h) {
+                            const val = String(h).trim();
+                            if (val.includes('商品編號') || val.includes('商品编号') || val.includes('商品编号PCB') || val.includes('商品編號PCB')) {
+                                nameColIdx = idx;
+                            }
+                            if (val === '成本') {
+                                costColIdx = idx;
+                            }
+                            if (val === 'RMB' && sheetName === 'XZ板子') {
+                                costColIdx = idx;
+                            }
+                            if (val === '售價' || val === '售价') {
+                                // Fallback to 售价 for other sheets
+                                if (sheetName !== 'XK' && sheetName !== 'XZ板子') {
+                                    costColIdx = idx;
+                                }
+                            }
+                        }
+                    });
+
+                    // Parse item rows from index 2 onwards
+                    const items = [];
+                    for (let r = 2; r < rows.length; r++) {
+                        const row = rows[r];
+                        if (!row) continue;
+                        
+                        const code = row[nameColIdx];
+                        let cost = parseFloat(row[costColIdx]);
+
+                        // Skip rows with missing product code or invalid/zero cost
+                        if (code === undefined || code === null || String(code).trim() === '') continue;
+                        if (isNaN(cost)) cost = 0; // Fallback to 0
+
+                        items.push({
+                            code: String(code).trim(),
+                            cost: cost,
+                            rowIdx: r,
+                            originalRow: row, // Preserved for exporting exactly
+                            nameColIdx: nameColIdx,
+                            costColIdx: costColIdx
+                        });
+                    }
+
+                    if (items.length > 0) {
+                        productsData[sheetName] = items;
+                    }
+                });
+
+                // Update Zone State
+                const zone = document.getElementById('productsDropZone');
+                zone.classList.add('success');
+                document.getElementById('prodTitle').innerText = '速賣通產品資料載入成功！';
+                const fileInfo = document.getElementById('productsFileInfo');
+                let totalProd = 0;
+                Object.values(productsData).forEach(arr => totalProd += arr.length);
+                fileInfo.innerText = `已讀取 ${Object.keys(productsData).length} 個工作表，共 ${totalProd} 筆商品。`;
+                fileInfo.style.display = 'block';
+
+                // Populate tabs
+                buildSheetTabs();
+                checkVerificationAndShowDashboard();
+                showToast(`已成功導入 ${totalProd} 筆商品價格數據！`);
+            } catch (err) {
+                console.error(err);
+                alert('解析速賣通價格計算工具.xlsx失敗！請確保檔案格式正確。');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function buildSheetTabs() {
+        const tabsContainer = document.getElementById('sheetTabs');
+        tabsContainer.innerHTML = '';
+        
+        const sheets = Object.keys(productsData);
+        if (sheets.length === 0) return;
+
+        sheets.forEach((sheetName, index) => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            btn.innerText = `${sheetName} (${productsData[sheetName].length})`;
+            btn.onclick = () => selectSheetTab(sheetName, btn);
+            tabsContainer.appendChild(btn);
+        });
+
+        currentSheet = sheets[0];
+    }
+
+    function selectSheetTab(sheetName, buttonEl) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        buttonEl.classList.add('active');
+        currentSheet = sheetName;
+        currentPage = 1;
+        renderTable();
+    }
+
+    function checkVerificationAndShowDashboard() {
+        if (shippingRates && Object.keys(productsData).length > 0) {
+            document.getElementById('dashboard').style.display = 'block';
+            renderTable();
+        }
+    }
+
+    // Cargo type toggle: General vs Special Cargo
+    function setCargoType(special) {
+        isSpecialCargo = special;
+        document.getElementById('typeGeneral').classList.toggle('active', !special);
+        document.getElementById('typeSpecial').classList.toggle('active', special);
+        currentPage = 1;
+        renderTable();
+    }
+
+    // Core Shipping Engine Calculation - returns base rate
+    function calculateBaseShippingRMB(countryCode, weightKg, isSpecial) {
+        if (!shippingRates || !shippingRates[countryCode]) return 0;
+        const rates = shippingRates[countryCode];
+        let baseFee = 0;
+
+        if (weightKg <= 2.0) {
+            if (!isSpecial) {
+                // General Goods (普貨) Weight brackets
+                if (weightKg <= 0.150) {
+                    baseFee = weightKg * rates.general_0_150_ship + rates.general_0_150_reg;
+                } else if (weightKg <= 0.300) {
+                    baseFee = weightKg * rates.general_150_300_ship + rates.general_150_300_reg;
+                } else {
+                    baseFee = weightKg * rates.general_300_2000_ship + rates.general_300_2000_reg;
+                }
+            } else {
+                // Special Goods (非普貨, e.g. batteries)
+                baseFee = weightKg * rates.special_0_2000_ship + rates.special_0_2000_reg;
+            }
+        } else {
+            // Large parcel (>2kg) Calculation
+            const step = Math.ceil((weightKg - 0.5) * 2);
+            baseFee = rates.large_first_0_5kg + step * rates.large_next_0_5kg;
+        }
+
+        return baseFee;
+    }
+
+    // UI Updates on Global Configuration Input
+    function updateGlobalSettings() {
+        renderTable();
+    }
+
+    // Search and Pagination Controls
+    function handleSearch() {
+        searchQuery = document.getElementById('searchBar').value.toLowerCase().trim();
+        currentPage = 1;
+        renderTable();
+    }
+
+    function resetAllOverrides() {
+        if (confirm('確定要清除所有手動編輯過的商品定價、利潤率、重量與活動折扣微調，全部重置回全球核心參數設定嗎？')) {
+            itemOverrides = {};
+            competitorPrices = {};
+            renderTable();
+            showToast('所有微調已成功重置！');
+        }
+    }
+
+    // Dynamic UI Table Rendering
+    function renderTable() {
+        const tableBody = document.getElementById('tableBody');
+        const countryCode = document.getElementById('globalCountry').value;
+
+        if (!countryCode) {
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">⚠️ 請先在上方「全球核心參數設定」中選擇目的地國家以計算運費。</td></tr>`;
+            document.getElementById('paginationInfo').innerText = '顯示第 0 至 0 筆，共 0 筆';
+            document.getElementById('paginationControls').innerHTML = '';
+            return;
+        }
+
+        if (!currentSheet || !productsData[currentSheet]) return;
+
+        const allItems = productsData[currentSheet];
+
+        // Filter items
+        const filteredItems = allItems.filter(item => {
+            if (!searchQuery) return true;
+            return item.code.toLowerCase().includes(searchQuery);
+        });
+
+        const totalItems = filteredItems.length;
+        if (totalItems === 0) {
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">🔍 找不到與「${searchQuery}」匹配的商品。</td></tr>`;
+            document.getElementById('paginationInfo').innerText = '顯示第 0 至 0 筆，共 0 筆';
+            document.getElementById('paginationControls').innerHTML = '';
+            return;
+        }
+
+        // Pagination bounds
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIdx = (currentPage - 1) * itemsPerPage;
+        const endIdx = Math.min(startIdx + itemsPerPage, totalItems);
+        const pageItems = filteredItems.slice(startIdx, endIdx);
+
+        // Core global parameters
+        const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
+        const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
+        const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
+        const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
+        const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
+
+        // New global inputs
+        const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
+        const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
+        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 0;
+
+        const targetMargin = targetMargPercentage / 100;
+
+        tableBody.innerHTML = '';
+
+        pageItems.forEach((item) => {
+            const itemKey = `${currentSheet}_${item.code}`;
+            const override = itemOverrides[itemKey] || {};
+
+            // 1. Determine Weight (row override vs global default)
+            const weight = (override.weight !== undefined) ? override.weight : defaultWt;
+
+            // 2. Determine Activity Discount (row override vs global default)
+            const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
+
+            // 3. Calculate fixed Shipping Fee based strictly on weight!
+            const shippingRMB = calculateBaseShippingRMB(countryCode, weight, isSpecialCargo);
+
+            // 4. Determine Profit Margin (from override or default)
+            const margin = (override.margin !== undefined) ? override.margin : targetMargin;
+
+            // 5. Calculate Selling Prices based on the target Margin and platform fee
+            // Total Cost = COGS + Domestic Shipping + International Shipping + Customs Fee
+            const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+
+            // Prevent division by zero if platform fee rate >= 100% or discount >= 100%
+            const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+            const totalDiscount = Math.min(99, activityDiscount + extraDisc);
+            const netDiscountFactor = 1 - totalDiscount / 100;
+
+            const salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+            const retailPriceUSD = salePriceUSD / netDiscountFactor;
+
+            // Create Row Element with explicit Grid Borders
+            const tr = document.createElement('tr');
+            if (currentViewMode === 'pricing') {
+                const salePriceRMB = salePriceUSD * exchRate;
+                const retailPriceRMB = retailPriceUSD * exchRate;
+                
+                tr.innerHTML = `
+                    <td style="text-align: center;"><span class="badge badge-purple">${currentSheet}</span></td>
+                    <td style="font-weight:600; color:#fff;">${item.code}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 1.5rem;">¥${item.cost.toFixed(2)}</td>
+                    <td style="text-align: center;">
+                        <input type="number" class="table-input" step="0.01" min="0.001" value="${weight.toFixed(3)}" 
+                            onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:80px;">
+                    </td>
+                    <td style="text-align: center; white-space: nowrap;">
+                        <span style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-right:4px;">${Math.round(platformFeeRate)} +</span>
+                        <input type="number" class="table-input" step="1" min="0" max="100" value="${Math.round(activityDiscount)}" 
+                            onchange="handleRowOverride('${item.code}', 'activityDiscount', this.value)" style="width:65px;"> <span style="font-size:0.85rem; color:var(--text-muted);">%</span>
+                    </td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 1.5rem;">¥${shippingRMB.toFixed(2)}</td>
+                    <td style="text-align: center;">
+                        <input type="number" class="table-input" step="1" min="-99" max="99" value="${Math.round(margin * 100)}" 
+                            onchange="handleRowOverride('${item.code}', 'margin', this.value)" style="width:70px;"> <span style="font-size:0.85rem; color:var(--text-muted);">%</span>
+                    </td>
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 1rem;">¥${salePriceRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 1rem;">$${salePriceUSD.toFixed(2)}</td>
+                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 1rem;">¥${retailPriceRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 1rem;">$${retailPriceUSD.toFixed(2)}</td>
+                `;
+            } else {
+                const competitorPriceUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : salePriceUSD;
+                const competitorPriceRMB = competitorPriceUSD * exchRate;
+                const competitorFeeRMB = competitorPriceRMB * (platformFeeRate / 100);
+                const competitorNetRevenueRMB = competitorPriceRMB - competitorFeeRMB;
+                const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
+                const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
+                
+                const isPositive = competitorProfitRMB >= 0;
+                const profitColorStyle = isPositive ? 'color: #10b981;' : 'color: #ec4899;';
+                const profitSymbol = isPositive ? '¥' : '-¥';
+                const absProfitVal = Math.abs(competitorProfitRMB).toFixed(2);
+                
+                tr.innerHTML = `
+                    <td style="text-align: center;"><span class="badge badge-purple">${currentSheet}</span></td>
+                    <td style="font-weight:600; color:#fff;">${item.code}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 1.5rem;">¥${item.cost.toFixed(2)}</td>
+                    <td style="text-align: center;">
+                        <input type="number" class="table-input" step="0.01" min="0.001" value="${weight.toFixed(3)}" 
+                            onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:80px;">
+                    </td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 1.5rem;">¥${shippingRMB.toFixed(2)}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 1.5rem; color: #fff;">¥${totalCostRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 1.5rem;">¥${competitorPriceRMB.toFixed(2)}</td>
+                    <td style="text-align: center;">
+                        <input type="number" class="table-input" step="0.01" min="0" value="${competitorPriceUSD.toFixed(2)}" 
+                            onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:90px; border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05);">
+                    </td>
+                    <td class="highlight-text" style="text-align: right; padding-right: 1.5rem; ${profitColorStyle}">${profitSymbol}${absProfitVal}</td>
+                    <td class="highlight-text" style="text-align: center; ${profitColorStyle}">${competitorProfitRate.toFixed(2)}%</td>
+                `;
+            }
+            tableBody.appendChild(tr);
+        });
+
+        // Update Pagination Info
+        document.getElementById('paginationInfo').innerText = `顯示第 ${startIdx + 1} 至 ${endIdx} 筆，共 ${totalItems} 筆商品`;
+
+        // Render Pagination buttons
+        buildPaginationControls(totalPages);
+    }
+
+    function buildPaginationControls(totalPages) {
+        const container = document.getElementById('paginationControls');
+        container.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'page-btn';
+        prevBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+            </svg>
+        `;
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        };
+        container.appendChild(prevBtn);
+
+        // Page number buttons logic
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (startPage > 1) {
+            const btn = document.createElement('button');
+            btn.className = `page-btn`;
+            btn.innerText = '1';
+            btn.onclick = () => { currentPage = 1; renderTable(); };
+            container.appendChild(btn);
+
+            if (startPage > 2) {
+                const dots = document.createElement('span');
+                dots.innerText = '...';
+                dots.style.color = 'var(--text-muted)';
+                dots.style.padding = '0 0.25rem';
+                container.appendChild(dots);
+            }
+        }
+
+        for (let p = startPage; p <= endPage; p++) {
+            const btn = document.createElement('button');
+            btn.className = `page-btn ${p === currentPage ? 'active' : ''}`;
+            btn.innerText = p;
+            btn.onclick = () => { currentPage = p; renderTable(); };
+            container.appendChild(btn);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const dots = document.createElement('span');
+                dots.innerText = '...';
+                dots.style.color = 'var(--text-muted)';
+                dots.style.padding = '0 0.25rem';
+                container.appendChild(dots);
+            }
+
+            const btn = document.createElement('button');
+            btn.className = `page-btn`;
+            btn.innerText = totalPages;
+            btn.onclick = () => { currentPage = totalPages; renderTable(); };
+            container.appendChild(btn);
+        }
+
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'page-btn';
+        nextBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+            </svg>
+        `;
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        };
+        container.appendChild(nextBtn);
+    }
+
+    // Handles interactive inline edits
+    function handleRowOverride(productCode, field, value) {
+        const itemKey = `${currentSheet}_${productCode}`;
+        if (!itemOverrides[itemKey]) {
+            itemOverrides[itemKey] = {};
+        }
+
+        const val = parseFloat(value);
+        if (isNaN(val)) return;
+
+        if (field === 'weight') {
+            itemOverrides[itemKey].weight = val;
+        } else if (field === 'activityDiscount') {
+            itemOverrides[itemKey].activityDiscount = val;
+        } else if (field === 'margin') {
+            itemOverrides[itemKey].margin = val / 100;
+        }
+
+        renderTable();
+    }
+
+    // Set active view mode and re-render
+    function setViewMode(mode) {
+        currentViewMode = mode;
+        
+        // Update active class on toggle buttons
+        document.getElementById('viewPricingBtn').classList.toggle('active', mode === 'pricing');
+        document.getElementById('viewCompetitorBtn').classList.toggle('active', mode === 'competitor');
+        
+        // Update table headers dynamically
+        const thead = document.getElementById('tableHeader');
+        if (mode === 'pricing') {
+            thead.innerHTML = `
+                <tr>
+                    <th>商品工作表</th>
+                    <th>商品編號</th>
+                    <th>採購成本 (RMB)</th>
+                    <th>商品重量 (KG)</th>
+                    <th>活動折扣 (%)</th>
+                    <th>無憂標準運費 (RMB)</th>
+                    <th>實際利潤 (%)</th>
+                    <th>特價 (RMB)</th>
+                    <th>特價 (USD)</th>
+                    <th>零售價 (RMB)</th>
+                    <th>零售價 (USD)</th>
+                </tr>
+            `;
+        } else {
+            thead.innerHTML = `
+                <tr>
+                    <th>商品工作表</th>
+                    <th>商品編號</th>
+                    <th>採購成本 (RMB)</th>
+                    <th>商品重量 (KG)</th>
+                    <th>無憂運費 (RMB)</th>
+                    <th>總成本 (RMB)</th>
+                    <th>對手含運售價 (RMB)</th>
+                    <th>對手含運售價 (USD)</th>
+                    <th>對手淨利潤 (RMB)</th>
+                    <th>對手實際利潤率 (%)</th>
+                </tr>
+            `;
+        }
+        
+        currentPage = 1;
+        renderTable();
+    }
+
+    // Handles interactive inline competitor price updates
+    function handleCompetitorPriceOverride(productCode, value) {
+        const itemKey = `${currentSheet}_${productCode}`;
+        const val = parseFloat(value);
+        if (isNaN(val)) return;
+        
+        competitorPrices[itemKey] = val;
+        renderTable();
+    }
+
+    // Client-side Excel calculations export
+    function exportCalculations() {
+        if (!shippingRates || Object.keys(productsData).length === 0) {
+            alert('請確認已完成「無憂標準」與「產品」兩個 Excel 檔案的匯入。');
+            return;
+        }
+
+        const countryCode = document.getElementById('globalCountry').value;
+        if (!countryCode) {
+            alert('請選擇一個目的地國家再進行導出！');
+            return;
+        }
+
+        const country = shippingRates[countryCode];
+        const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
+        const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
+        const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
+        const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
+        const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
+
+        const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
+        const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
+        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 0;
+
+        const targetMargin = targetMargPercentage / 100;
+
+        // Spinner state
+        const exportBtn = document.getElementById('exportBtn');
+        const originalHtml = exportBtn.innerHTML;
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = `<span class="spinner"></span> 正在生成報表...`;
+
+        setTimeout(() => {
+            try {
+                // We create a copy of all worksheets
+                const newWorkbook = XLSX.utils.book_new();
+
+                Object.keys(productsData).forEach(sheetName => {
+                    const items = productsData[sheetName];
+                    
+                    // Reconstruct rows by keeping all original columns plus appended calculations
+                    let maxCols = 0;
+                    items.forEach(item => {
+                        if (item.originalRow.length > maxCols) maxCols = item.originalRow.length;
+                    });
+
+                    // Build a temporary array representation of sheet rows
+                    const sheetRows = [];
+                    
+                    // Row 0 is the original title (index 0)
+                    sheetRows[0] = ["商品信息"]; // Default title
+                    
+                    // Rebuild true headers
+                    let targetHeaders = [];
+                    if (sheetName === 'XK') {
+                        targetHeaders = ['行号', '图', '商品编号', '成本', '商品备注', '', '', '', '', '', '', '', '', '', '', '', '', '', '滿減'];
+                    } else if (sheetName === 'XZ板子') {
+                        targetHeaders = ['行号', '图', '商品编号PCB', '售价', 'keyshell', 'RMB'];
+                    } else {
+                        targetHeaders = ['行号', '图', '商品编号', '售价', '商品备注'];
+                    }
+
+                    // Append new columns
+                    const newHeaders = [...targetHeaders];
+                    // Extend to match max columns
+                    while (newHeaders.length < maxCols) newHeaders.push("");
+                    
+                    if (currentViewMode === 'pricing') {
+                        newHeaders.push("計費重量(KG)");
+                        newHeaders.push("活動折扣(%)");
+                        newHeaders.push("無憂標準運費(RMB)");
+                        newHeaders.push("特價(RMB)");
+                        newHeaders.push("特價(USD)");
+                        newHeaders.push("零售價(RMB)");
+                        newHeaders.push("零售價(USD)");
+                        newHeaders.push("實際利潤率(%)");
+                    } else {
+                        newHeaders.push("計費重量(KG)");
+                        newHeaders.push("無憂標準運費(RMB)");
+                        newHeaders.push("總成本(RMB)");
+                        newHeaders.push("對手含運售價(RMB)");
+                        newHeaders.push("對手含運售價(USD)");
+                        newHeaders.push("對手平台佣金(RMB)");
+                        newHeaders.push("對手淨利潤(RMB)");
+                        newHeaders.push("對手實際利潤率(%)");
+                    }
+
+                    sheetRows[1] = newHeaders;
+
+                    // Fill in data rows
+                    items.forEach(item => {
+                        const rIdx = item.rowIdx;
+                        const itemKey = `${sheetName}_${item.code}`;
+                        const override = itemOverrides[itemKey] || {};
+
+                        // Weight
+                        const weight = (override.weight !== undefined) ? override.weight : defaultWt;
+
+                        // Activity Discount Override
+                        const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
+
+                        // Shipping calculation
+                        const shippingRMB = calculateBaseShippingRMB(countryCode, weight, isSpecialCargo);
+
+                        // Margin & Price calculations
+                        const margin = (override.margin !== undefined) ? override.margin : targetMargin;
+
+                        const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+                        const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+                        const totalDiscount = Math.min(99, activityDiscount + extraDisc);
+                        const netDiscountFactor = 1 - totalDiscount / 100;
+
+                        const salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+                        const retailPriceUSD = salePriceUSD / netDiscountFactor;
+                        
+                        const salePriceRMB = salePriceUSD * exchRate;
+                        const retailPriceRMB = retailPriceUSD * exchRate;
+
+                        // Build original row array and append calculations
+                        const originalRowCopy = [...item.originalRow];
+                        while (originalRowCopy.length < maxCols) originalRowCopy.push("");
+
+                        if (currentViewMode === 'pricing') {
+                            originalRowCopy.push(weight);
+                            originalRowCopy.push(activityDiscount + "%");
+                            originalRowCopy.push(shippingRMB);
+                            originalRowCopy.push(salePriceRMB);
+                            originalRowCopy.push(salePriceUSD);
+                            originalRowCopy.push(retailPriceRMB);
+                            originalRowCopy.push(retailPriceUSD);
+                            originalRowCopy.push(Math.round(margin * 100) + "%");
+                        } else {
+                            const competitorPriceUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : salePriceUSD;
+                            const competitorPriceRMB = competitorPriceUSD * exchRate;
+                            const competitorFeeRMB = competitorPriceRMB * (platformFeeRate / 100);
+                            const competitorNetRevenueRMB = competitorPriceRMB - competitorFeeRMB;
+                            const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
+                            const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
+
+                            originalRowCopy.push(weight);
+                            originalRowCopy.push(shippingRMB);
+                            originalRowCopy.push(totalCostRMB);
+                            originalRowCopy.push(competitorPriceRMB);
+                            originalRowCopy.push(competitorPriceUSD);
+                            originalRowCopy.push(competitorFeeRMB);
+                            originalRowCopy.push(competitorProfitRMB);
+                            originalRowCopy.push(competitorProfitRate.toFixed(2) + "%");
+                        }
+
+                        sheetRows[rIdx] = originalRowCopy;
+                    });
+
+                    // Pad empty indices
+                    for (let r = 0; r < sheetRows.length; r++) {
+                        if (!sheetRows[r]) sheetRows[r] = [];
+                    }
+
+                    const newSheet = XLSX.utils.aoa_to_sheet(sheetRows);
+                    XLSX.utils.book_append_sheet(newWorkbook, newSheet, sheetName);
+                });
+
+                // Generate and download
+                const filename = `速賣通價格定價結果_${country.name}_${isSpecialCargo ? '非普貨' : '普貨'}.xlsx`;
+                XLSX.writeFile(newWorkbook, filename);
+                showToast(`定價表格導出成功！`);
+            } catch (err) {
+                console.error(err);
+                alert('導出 Excel 失敗，請重試！');
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = originalHtml;
+            }
+        }, 150);
+    }
+
+    // Helper: Show notification toast
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>
