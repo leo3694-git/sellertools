@@ -862,7 +862,7 @@
             </svg>
             📊 單件商品手動快速試算區 (無須匯入 Excel 即可使用)
         </h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">商品採購成本 (RMB)</label>
                 <input type="number" id="manualCost" class="input-control" value="40" step="1" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
@@ -870,6 +870,10 @@
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">商品重量 (KG)</label>
                 <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">預期利潤 (%)</label>
+                <input type="number" id="manualMargin" class="input-control" value="20" step="1" min="-99" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">活動折扣 (%)</label>
@@ -942,7 +946,7 @@
     <!-- Main Dashboard - Visible after files loaded -->
     <div class="dashboard-content" id="dashboard">
         <!-- Global Parameter Settings Card -->
-        <div class="glass-card">
+        <div class="glass-card" style="position: relative; z-index: 30;">
             <h2 style="font-size:1.15rem; font-family:'Outfit',sans-serif; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-cyan);">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -1044,7 +1048,7 @@
         </div>
 
         <!-- View Mode Toggle -->
-        <div class="glass-card" style="padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.02);">
+        <div class="glass-card" style="position: relative; z-index: 20; padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.02);">
             <div style="display: flex; align-items: center; gap: 0.4rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px; stroke:var(--accent-cyan);">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -1090,7 +1094,7 @@
         </div>
 
         <!-- Product Pricing Table Card -->
-        <div class="glass-card" style="padding: 0.75rem;">
+        <div class="glass-card" style="padding: 0.75rem; position: relative; z-index: 10;">
             <div class="table-container">
                 <table id="productTable">
                     <thead id="tableHeader">
@@ -1569,6 +1573,9 @@
     function checkVerificationAndShowDashboard() {
         if (shippingRates && Object.keys(productsData).length > 0) {
             document.getElementById('dashboard').style.display = 'block';
+            // Hide the two big upload blocks once files are successfully loaded
+            const uploadSec = document.querySelector('.upload-section');
+            if (uploadSec) uploadSec.style.display = 'none';
             renderTable();
         }
     }
@@ -1652,16 +1659,17 @@
         const weight = parseFloat(document.getElementById('manualWeight').value) || 0;
         const discount = parseFloat(document.getElementById('manualDiscount').value) || 0;
         const competitorUSD = parseFloat(document.getElementById('manualCompetitorPrice').value);
+        const manualMarginVal = parseFloat(document.getElementById('manualMargin').value);
 
         // Global core settings
         const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
-        const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
         const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
         const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
         const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
         const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
 
-        const targetMargin = targetMargPercentage / 100;
+        const targetMargin = isNaN(manualMarginVal) ? 0.20 : (manualMarginVal / 100);
+        const targetMargPercentage = isNaN(manualMarginVal) ? 20 : manualMarginVal;
         const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
         const totalCostRMB = cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
