@@ -43,7 +43,7 @@
             background: radial-gradient(circle at top left, #17122a, #0b0f19 60%, #07090d);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 2rem 1.5rem;
+            padding: 1.5rem 1rem;
             overflow-x: hidden;
         }
 
@@ -55,25 +55,25 @@
 
         header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             position: relative;
         }
 
         header h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: 2.8rem;
+            font-size: 2.4rem;
             font-weight: 800;
             background: linear-gradient(135deg, #a78bfa, #06b6d4, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             text-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
         }
 
         header p {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: 400;
         }
 
@@ -84,8 +84,8 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-radius: var(--card-radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             transition: transform var(--transition-speed), box-shadow var(--transition-speed);
         }
@@ -94,12 +94,180 @@
             box-shadow: 0 15px 35px rgba(139, 92, 246, 0.1);
         }
 
+        /* Custom Multi-Select Dropdown with Search */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-trigger {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all var(--transition-speed);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-trigger:hover {
+            background: #f3f4f6 !important;
+            border-color: var(--primary);
+        }
+
+        .dropdown-trigger svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            stroke: #000000;
+            transition: transform var(--transition-speed);
+        }
+
+        .dropdown-trigger.open svg {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.75rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .dropdown-search-container {
+            position: relative;
+        }
+
+        .dropdown-search-container input {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .dropdown-search-container input:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .dropdown-actions {
+            display: flex;
+            gap: 0.35rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 0.4rem;
+        }
+
+        .dropdown-action-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 0.25rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .dropdown-action-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .dropdown-items {
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding-right: 4px;
+        }
+
+        .dropdown-items::-webkit-scrollbar {
+            width: 5px;
+        }
+        .dropdown-items::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background var(--transition-speed);
+            user-select: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .dropdown-item.active-primary {
+            background: rgba(139, 92, 246, 0.18);
+            border-left: 3px solid var(--primary);
+        }
+
+        .dropdown-item input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+        }
+
+        .dropdown-item-label {
+            flex: 1;
+            font-size: 0.82rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #d1d5db;
+        }
+
+        .dropdown-item.active-primary .dropdown-item-label {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .primary-badge {
+            font-size: 0.65rem;
+            background: var(--primary);
+            color: #fff;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
         /* Drag & Drop Upload State */
         .upload-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         @media (max-width: 768px) {
@@ -111,7 +279,7 @@
         .drop-zone {
             border: 2px dashed rgba(139, 92, 246, 0.4);
             border-radius: var(--card-radius);
-            padding: 2.5rem 1.5rem;
+            padding: 1.75rem 1rem;
             text-align: center;
             cursor: pointer;
             background: rgba(17, 25, 40, 0.35);
@@ -122,7 +290,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 180px;
+            min-height: 140px;
         }
 
         .drop-zone:hover, .drop-zone.dragover {
@@ -138,9 +306,9 @@
         }
 
         .drop-zone svg {
-            width: 44px;
-            height: 44px;
-            margin-bottom: 1rem;
+            width: 36px;
+            height: 36px;
+            margin-bottom: 0.75rem;
             stroke: var(--primary);
             transition: transform var(--transition-speed);
         }
@@ -155,19 +323,19 @@
         }
 
         .drop-zone h3 {
-            font-size: 1.15rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
             font-weight: 600;
         }
 
         .drop-zone p {
-            font-size: 0.9rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
         }
 
         .file-info {
-            margin-top: 0.5rem;
-            font-size: 0.85rem;
+            margin-top: 0.4rem;
+            font-size: 0.8rem;
             color: var(--accent-green);
             font-weight: 500;
             display: none;
@@ -176,18 +344,18 @@
         /* Config Grid Panel */
         .config-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .input-group label {
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -198,9 +366,9 @@
             background: var(--input-bg);
             border: 1px solid var(--glass-border);
             border-radius: 8px;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 0.8rem;
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             outline: none;
             transition: all var(--transition-speed);
@@ -213,16 +381,6 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        select.input-control {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f3f4f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1.2rem;
-            padding-right: 2.5rem;
-        }
-
         /* Toggle Button Group */
         .toggle-group {
             display: flex;
@@ -231,7 +389,7 @@
             border-radius: 8px;
             padding: 2px;
             width: 100%;
-            height: 43px;
+            height: 38px;
         }
 
         .toggle-btn {
@@ -240,7 +398,7 @@
             border: none;
             color: var(--text-muted);
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
             border-radius: 6px;
             transition: all var(--transition-speed);
@@ -257,14 +415,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             flex-wrap: wrap;
             gap: 1rem;
         }
 
         .tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
             overflow-x: auto;
             padding-bottom: 4px;
             max-width: 100%;
@@ -281,10 +439,10 @@
         .tab-btn {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
-            padding: 0.6rem 1.2rem;
+            padding: 0.5rem 1rem;
             border-radius: 30px;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -308,30 +466,33 @@
         .search-bulk-panel {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
             width: 100%;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             flex-wrap: wrap;
         }
 
         .search-wrapper {
             position: relative;
             flex: 1;
-            min-width: 280px;
+            min-width: 250px;
         }
 
         .search-wrapper svg {
             position: absolute;
-            left: 1rem;
+            left: 0.85rem;
             top: 50%;
             transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             stroke: var(--text-muted);
         }
 
         .search-input {
-            padding-left: 2.8rem !important;
+            padding-left: 2.5rem !important;
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+            font-size: 0.85rem !important;
         }
 
         /* Buttons */
@@ -339,15 +500,15 @@
             background: var(--primary);
             color: var(--text-main);
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             transition: all var(--transition-speed);
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
             outline: none;
@@ -381,51 +542,50 @@
             transform: none !important;
         }
 
-        /* Advanced Grid Table scroll view */
+        /* High-Density Compact Table Scroll View */
         .table-container {
             width: 100%;
-            max-height: 600px; /* Frozen Header vertical height limit */
-            overflow-y: auto;  /* Vertical scroll enable */
-            overflow-x: auto;  /* Horizontal scroll enable */
+            max-height: 550px; 
+            overflow-y: auto;  
+            overflow-x: auto;  
             border-radius: 12px;
             border: 1px solid var(--glass-border);
             background: rgba(10, 15, 26, 0.6);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .table-container::-webkit-scrollbar {
-            height: 8px;
-            width: 8px;
+            height: 6px;
+            width: 6px;
         }
         .table-container::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.82rem; /* Compact High-legibility font */
             border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         th, td {
             border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 0.85rem 1rem;
+            padding: 0.35rem 0.5rem; /* Tight compact cell spacing */
+            vertical-align: middle;
+            white-space: nowrap;
         }
 
         th {
-            background: var(--table-header-bg) !important; /* Solid dark background to prevent scrolled content overlay */
+            background: var(--table-header-bg) !important; 
             color: var(--text-muted);
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.78rem;
-            letter-spacing: 0.8px;
+            font-size: 0.74rem;
+            letter-spacing: 0.5px;
             border-bottom: 2px solid rgba(255, 255, 255, 0.18) !important;
-            white-space: nowrap;
-            
-            /* Sticky Header Row Configuration */
             position: sticky;
             top: 0;
             z-index: 10;
@@ -433,8 +593,6 @@
 
         td {
             color: #d1d5db;
-            vertical-align: middle;
-            white-space: nowrap;
         }
 
         tr {
@@ -445,19 +603,39 @@
             background: var(--table-row-hover);
         }
 
-        /* Inline Table Inputs */
+        /* Expand Button Styling */
+        .expand-btn {
+            font-family: monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+            user-select: none;
+            display: inline-block;
+            transition: all var(--transition-speed);
+        }
+        .expand-btn:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* Inline Table Inputs - Small size */
         .table-input {
-            width: 75px;
+            width: 65px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: var(--text-main);
-            padding: 0.35rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
+            padding: 0.18rem 0.3rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
             font-weight: 600;
             text-align: center;
             outline: none;
             transition: all var(--transition-speed);
+            height: 25px;
         }
 
         .table-input:focus {
@@ -469,9 +647,9 @@
         /* Specialized Badges */
         .badge {
             display: inline-block;
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
         }
@@ -482,10 +660,16 @@
             border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
+        .badge-cyan {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
         /* Calculated Highlight Styles */
         .highlight-text {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
         }
 
         .highlight-purple {
@@ -505,19 +689,19 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             flex-wrap: wrap;
             gap: 1rem;
         }
 
         .pagination-info {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
         .pagination-controls {
             display: flex;
-            gap: 0.35rem;
+            gap: 0.25rem;
             align-items: center;
         }
 
@@ -525,10 +709,10 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
-            min-width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            font-size: 0.85rem;
+            min-width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -553,20 +737,6 @@
         .page-btn:disabled {
             opacity: 0.45;
             cursor: not-allowed;
-        }
-
-        /* Specific High-Legibility Country Selector Style */
-        #globalCountry {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            font-weight: 600;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23000000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
-        }
-        
-        #globalCountry option {
-            color: #000000 !important;
-            background-color: #ffffff !important;
         }
 
         /* Hide dashboard before files loaded */
@@ -599,8 +769,8 @@
         /* Loading Spinner */
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.1);
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border-left-color: var(--text-main);
             animation: spin 1s linear infinite;
@@ -622,7 +792,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             color: #fff;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.25rem;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             font-weight: 600;
@@ -646,34 +816,9 @@
 <div class="container">
     <header>
         <h1>速賣通跨境定價與運費計算系統</h1>
-        <p>提供 AliExpress Standard Shipping（無憂標準）國家運費精確試算，多工作表批量調整與 XLS 導出</p>
+        <p>提供 AliExpress Standard Shipping（無憂標準）多國運費精確試算，高密度工作表批量調整與一鍵 XLS 導出</p>
     </header>
 
-    <!-- Pricing Formula Display Card -->
-    <div class="glass-card" style="padding: 1.25rem 2rem; margin-bottom: 2rem; border-color: rgba(139, 92, 246, 0.25); background: rgba(139, 92, 246, 0.03);">
-        <h3 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-cyan); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; stroke: var(--accent-cyan);">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-            速賣通官方標準定價公式說明
-        </h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; font-size: 0.88rem; line-height: 1.6;">
-            <div style="border-left: 3px solid var(--accent-green); padding-left: 1rem;">
-                <strong style="color: var(--accent-green);">1. 買家實付【特價 (USD)】</strong>：涵蓋全部成本，保證您的目標實際利潤率
-                <div style="font-family: 'Outfit', monospace; font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
-                    特價 (USD) = [ 總成本 × (1 + 實際利潤%) ] ÷ [ 匯率 × (1 - 平台費率%) ]
-                </div>
-                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
-                    * 總成本 = 進貨價 + 國內運費 + 無憂標準運費 + 海關報關費
-                </div>
-            </div>
-            <div style="border-left: 3px solid var(--primary); padding-left: 1rem;">
-                <strong style="color: #c084fc;">2. 促銷刊登【零售價 (USD)】</strong>：逆推刊登零售價，確保折後剛好等於特價
-                <div style="font-family: 'Outfit', monospace; font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
-                    零售價 (USD) = 特價 (USD) ÷ [ 1 - (活動折扣% + 額外折扣%) / 100 ]
-                </div>
-            </div>
-        </div>
     <!-- CORS Security Warning Alert Banner (Visible only under file:/// protocol when autoload fails) -->
     <div id="corsAlert" class="glass-card" style="display: none; padding: 1.25rem 2rem; margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.04);">
         <h3 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: #f59e0b; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -686,6 +831,87 @@
             💡 偵測到您目前是直接雙擊開啟網頁。由於瀏覽器的隱私安全限制，此模式下 JavaScript 無法自動載入本地 Excel 檔案。<br>
             <strong>✨ 完美免上傳方案：</strong> 請<strong>雙擊執行資料夾中的『啟動價格計算器.bat』</strong>，網頁便可完美自動加載本地 Excel，無需任何手動上傳！或是您可以直接將檔案上傳至 GitHub Pages。當然，您仍然可以像以前一樣<strong>直接拖放這兩個 Excel 檔案</strong>至下方虛線框進行上傳。
         </p>
+    </div>
+
+    <!-- Live Currency Converter Widget -->
+    <div class="glass-card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-color: rgba(236, 72, 153, 0.25); background: rgba(236, 72, 153, 0.02);">
+        <h3 style="font-size: 0.9rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-pink); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; stroke: var(--accent-pink);">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            即時美金與人民幣雙向換算工具 (連動全域匯率)
+        </h3>
+        <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 200px;">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">美金 (USD)</span>
+                <input type="number" id="quickUSD" class="input-control" placeholder="輸入美金金額" step="0.01" style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="convertCurrency('usd')">
+            </div>
+            <div style="font-size: 1.25rem; color: var(--accent-pink); font-weight: 700; user-select: none;">⇄</div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 200px;">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">人民幣 (RMB)</span>
+                <input type="number" id="quickRMB" class="input-control" placeholder="輸入人民幣金額" step="0.01" style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="convertCurrency('rmb')">
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Product Manual Calculator -->
+    <div class="glass-card" style="border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.02); margin-bottom: 1.5rem;">
+        <h2 style="font-size:1.15rem; font-family:'Outfit',sans-serif; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem; color: var(--accent-green);">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-green);">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            📊 單件商品手動快速試算區 (無須匯入 Excel 即可使用)
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">商品採購成本 (RMB)</label>
+                <input type="number" id="manualCost" class="input-control" value="40" step="1" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">商品重量 (KG)</label>
+                <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">活動折扣 (%)</label>
+                <input type="number" id="manualDiscount" class="input-control" value="30" step="1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">對手含運售價 (USD - 選填)</label>
+                <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="試算對手利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+        </div>
+        
+        <!-- Manual Results Panel -->
+        <div id="manualResultPanel" style="background: rgba(0,0,0,0.35); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <!-- Renders dynamically -->
+        </div>
+    </div>
+
+    <!-- Pricing Formula Display Card -->
+    <div class="glass-card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-color: rgba(139, 92, 246, 0.25); background: rgba(139, 92, 246, 0.03);">
+        <h3 style="font-size: 0.9rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-cyan); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; stroke: var(--accent-cyan);">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            速賣通官方標準定價公式說明
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; font-size: 0.82rem; line-height: 1.5;">
+            <div style="border-left: 3px solid var(--accent-green); padding-left: 0.75rem;">
+                <strong style="color: var(--accent-green);">1. 買家實付【特價 (USD)】</strong>：涵蓋全部成本，保證您的目標實際利潤率
+                <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">
+                    特價 (USD) = [ 總成本 × (1 + 實際利潤%) ] ÷ [ 匯率 × (1 - 平台費率%) ]
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
+                    * 總成本 = 進貨價 + 國內運費 + 無憂標準運費 + 海關報關費
+                </div>
+            </div>
+            <div style="border-left: 3px solid var(--primary); padding-left: 0.75rem;">
+                <strong style="color: #c084fc;">2. 促銷刊登【零售價 (USD)】</strong>：逆推刊登零售價，確保折後剛好等於特價
+                <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">
+                    零售價 (USD) = 特價 (USD) ÷ [ 1 - (活動折扣% + 額外折扣%) / 100 ]
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- File Drop Zones -->
@@ -717,19 +943,37 @@
     <div class="dashboard-content" id="dashboard">
         <!-- Global Parameter Settings Card -->
         <div class="glass-card">
-            <h2 style="font-size:1.3rem; font-family:'Outfit',sans-serif; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:22px; height:22px; stroke:var(--accent-cyan);">
+            <h2 style="font-size:1.15rem; font-family:'Outfit',sans-serif; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-cyan);">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
                 全球核心參數設定
             </h2>
             <div class="config-grid">
-                <!-- Country Dropdown -->
+                <!-- Advanced Multi-Select Country Selector -->
                 <div class="input-group">
                     <label>目的地國家/地區</label>
-                    <select class="input-control" id="globalCountry">
-                        <option value="">選擇國家...</option>
-                    </select>
+                    <div class="custom-dropdown" id="countryDropdownContainer">
+                        <div class="dropdown-trigger" id="countryDropdownTrigger">
+                            <span>選擇國家...</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div class="dropdown-menu" id="countryDropdownMenu" style="display: none;">
+                            <div class="dropdown-search-container">
+                                <input type="text" id="countrySearch" placeholder="搜尋國家 (中文/英文)..." oninput="handleCountrySearch(this.value)">
+                            </div>
+                            <div class="dropdown-actions">
+                                <button class="dropdown-action-btn" onclick="toggleAllCountriesSelect(true)">全選</button>
+                                <button class="dropdown-action-btn" onclick="toggleAllCountriesSelect(false)">全清</button>
+                                <button class="dropdown-action-btn" onclick="selectDefaultPopularCountries()">預設熱門</button>
+                            </div>
+                            <div class="dropdown-items" id="countryDropdownItems">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Goods Type -->
@@ -788,20 +1032,28 @@
                     <label>美金匯率 (RMB/USD)</label>
                     <input type="number" class="input-control" id="exchangeRate" value="7.2" step="0.01" min="1" oninput="updateGlobalSettings()">
                 </div>
+
+                <!-- Exclude Shipping Fee Toggle Switch -->
+                <div class="input-group" style="justify-content: center; align-items: flex-start; height: 100%;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; margin-top: 1.35rem;">
+                        <input type="checkbox" id="excludeShippingToggle" onchange="toggleExcludeShipping()" style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+                        <span style="font-size: 0.88rem; font-weight: 600; color: #fff;">最終售價扣除運費 (不含運報價)</span>
+                    </label>
+                </div>
             </div>
         </div>
 
         <!-- View Mode Toggle -->
-        <div class="glass-card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.02);">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-cyan);">
+        <div class="glass-card" style="padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.02);">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px; stroke:var(--accent-cyan);">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span style="font-size: 1.05rem; font-weight: 700; font-family:'Outfit',sans-serif; color: #fff; letter-spacing: 0.5px;">系統功能模式</span>
+                <span style="font-size: 0.95rem; font-weight: 700; font-family:'Outfit',sans-serif; color: #fff; letter-spacing: 0.5px;">系統功能模式</span>
             </div>
-            <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 4px; border-radius: 30px; width: fit-content;">
-                <button id="viewPricingBtn" class="tab-btn active" onclick="setViewMode('pricing')" style="border: none; padding: 0.5rem 1.5rem; font-size: 0.88rem; border-radius: 20px;">📊 跨境定價與批量試算</button>
-                <button id="viewCompetitorBtn" class="tab-btn" onclick="setViewMode('competitor')" style="border: none; padding: 0.5rem 1.5rem; font-size: 0.88rem; border-radius: 20px;">⚔️ 競爭對手利潤分析</button>
+            <div style="display: flex; gap: 0.4rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 3px; border-radius: 30px; width: fit-content;">
+                <button id="viewPricingBtn" class="tab-btn active" onclick="setViewMode('pricing')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.8rem; border-radius: 20px;">📊 跨境定價與批量試算</button>
+                <button id="viewCompetitorBtn" class="tab-btn" onclick="setViewMode('competitor')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.8rem; border-radius: 20px;">⚔️ 競爭對手利潤分析</button>
             </div>
         </div>
 
@@ -813,23 +1065,23 @@
             
             <div class="search-bulk-panel">
                 <div class="search-wrapper">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input type="text" class="input-control search-input" id="searchBar" placeholder="搜尋商品編號..." oninput="handleSearch()">
                 </div>
 
                 <!-- Reset Settings Button -->
-                <button class="btn btn-cyan" onclick="resetAllOverrides()" title="將所有手動微調過的價格/利潤/重量與活動折扣重置為全球核心參數">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px;">
+                <button class="btn btn-cyan" onclick="resetAllOverrides()" title="將所有手動微調過的價格/利潤/重量與活動折扣重置為全球核心參數" style="padding: 0.5rem 1rem; font-size: 0.82rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1-2 3.472M20 20v-5h-.581m0 0a8.003 8.003 0 01-15.357-2" />
-                    </button>
+                    </svg>
                     重置為全域參數
                 </button>
 
                 <!-- Bulk Export Button -->
-                <button class="btn" id="exportBtn" onclick="exportCalculations()">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px;">
+                <button class="btn" id="exportBtn" onclick="exportCalculations()" style="padding: 0.5rem 1rem; font-size: 0.82rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     批量匯出 Excel
@@ -838,11 +1090,12 @@
         </div>
 
         <!-- Product Pricing Table Card -->
-        <div class="glass-card" style="padding: 1.25rem;">
+        <div class="glass-card" style="padding: 0.75rem;">
             <div class="table-container">
                 <table id="productTable">
                     <thead id="tableHeader">
                         <tr>
+                            <th style="width: 40px; text-align: center;">展開</th>
                             <th>商品工作表</th>
                             <th>商品編號</th>
                             <th>採購成本 (RMB)</th>
@@ -858,7 +1111,7 @@
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="11" style="text-align: center; padding: 3rem; color: var(--text-muted);">選擇國家並等待表格數據渲染...</td>
+                            <td colspan="12" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">選擇國家並等待表格數據渲染...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -886,20 +1139,33 @@
     let currentPage = 1;          // Pagination index
     const itemsPerPage = 50;      // Rows size for smoothness
 
+    // Dropdown selection state
+    let primaryCountry = 'US';                  // Primary calculation target
+    let selectedComparativeCountries = new Set(['US']); // Multiselect comparative set
+    let countrySearchQuery = '';                // Dropdown list search text
+
     // Object storing item overrides: key is `${sheetName}_${productCode}`
     // structure: { weight: null, margin: null, activityDiscount: null }
     let itemOverrides = {};
 
     let isSpecialCargo = false;  // Toggle between General and Special Cargo
 
+    // Pricing Options
+    let excludeShippingFee = false; // Substract shipping fee from suggested values
+
     // Competitor Analysis State
     let currentViewMode = 'pricing'; // 'pricing' or 'competitor'
     let competitorPrices = {};       // Stores competitor USD prices: key is `${sheetName}_${productCode}`
+
+    // Set of expanded product row keys
+    let expandedRows = new Set();
 
     // Event Bindings for Drag & Drop / Selection
     document.addEventListener('DOMContentLoaded', () => {
         setupDragAndDrop();
         setupFileSelectors();
+        setupDropdownTrigger();
+        calculateManualPrice(); // Compute manual calculator default state
         autoLoadExcelFiles();
     });
 
@@ -930,7 +1196,6 @@
     }
 
     function setupFileSelectors() {
-        // Shipping File Selector click trigger
         const shipZone = document.getElementById('shippingDropZone');
         const shipInput = document.getElementById('shippingFileInput');
         shipZone.addEventListener('click', () => shipInput.click());
@@ -938,12 +1203,30 @@
             if (e.target.files.length > 0) handleShippingFile(e.target.files[0]);
         });
 
-        // Products File Selector click trigger
         const prodZone = document.getElementById('productsDropZone');
         const prodInput = document.getElementById('productsFileInput');
         prodZone.addEventListener('click', () => prodInput.click());
         prodInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) handleProductsFile(e.target.files[0]);
+        });
+    }
+
+    function setupDropdownTrigger() {
+        const trigger = document.getElementById('countryDropdownTrigger');
+        const menu = document.getElementById('countryDropdownMenu');
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = menu.style.display === 'flex';
+            menu.style.display = isOpen ? 'none' : 'flex';
+            trigger.classList.toggle('open', !isOpen);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && e.target !== trigger) {
+                menu.style.display = 'none';
+                trigger.classList.remove('open');
+            }
         });
     }
 
@@ -958,9 +1241,8 @@
             } else if (f.name.includes('價格計算') || f.name.includes('速賣通')) {
                 prodFile = f;
             } else {
-                // Heuristic mapping by size
-                if (f.size < 500000) shipFile = f; // Shipping spreadsheet is tiny (<500kb)
-                else prodFile = f;                 // Product database is larger
+                if (f.size < 500000) shipFile = f; 
+                else prodFile = f;                 
             }
         }
 
@@ -988,7 +1270,6 @@
             const sheet = workbook.Sheets[sheetName];
             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            // We start parsing from row index 14 onwards (Albania starts here)
             const rates = {};
             for (let i = 14; i < rows.length; i++) {
                 const row = rows[i];
@@ -1000,7 +1281,6 @@
 
                 if (!countryName || !code) continue;
 
-                // Extracted values per columns
                 rates[code] = {
                     name: String(countryName).trim(),
                     englishName: String(englishName).trim(),
@@ -1020,7 +1300,6 @@
 
             shippingRates = rates;
             
-            // Update Zone State
             const zone = document.getElementById('shippingDropZone');
             zone.classList.add('success');
             document.getElementById('shipTitle').innerText = '無憂標準運費資料載入成功！';
@@ -1028,9 +1307,18 @@
             fileInfo.innerText = `已讀取 ${Object.keys(rates).length} 個國家/地區的配送報價。`;
             fileInfo.style.display = 'block';
 
-            // Populate Country Select
+            // Check if US is available to set defaults
+            if (rates['US']) {
+                primaryCountry = 'US';
+                selectedComparativeCountries = new Set(['US']);
+            } else {
+                primaryCountry = Object.keys(rates)[0];
+                selectedComparativeCountries = new Set([primaryCountry]);
+            }
+
             populateCountryDropdown();
             checkVerificationAndShowDashboard();
+            calculateManualPrice(); // recalculate with new rates
             return true;
         } catch (err) {
             console.error(err);
@@ -1039,27 +1327,116 @@
         }
     }
 
-    // Populate searchable selection
+    // Populate advanced multiselect searchable list
     function populateCountryDropdown() {
-        const dropdown = document.getElementById('globalCountry');
-        dropdown.innerHTML = '<option value="">選擇國家...</option>';
+        const itemsContainer = document.getElementById('countryDropdownItems');
+        itemsContainer.innerHTML = '';
 
         const countriesList = Object.values(shippingRates).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
-        countriesList.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.code;
-            opt.innerText = `${c.name} (${c.englishName})`;
-            if (c.code === 'US' || c.name.includes('美国') || c.name.includes('美國')) {
-                opt.selected = true; // Default to US if available
-            }
-            dropdown.appendChild(opt);
+        
+        // Filter countries if search query exists
+        const filteredList = countriesList.filter(c => {
+            if (!countrySearchQuery) return true;
+            const query = countrySearchQuery.toLowerCase();
+            return c.name.toLowerCase().includes(query) || c.englishName.toLowerCase().includes(query) || c.code.toLowerCase().includes(query);
         });
 
-        // Event listener
-        dropdown.addEventListener('change', () => {
-            currentPage = 1;
-            renderTable();
+        filteredList.forEach(c => {
+            const div = document.createElement('div');
+            div.className = `dropdown-item ${c.code === primaryCountry ? 'active-primary' : ''}`;
+            
+            // Checkbox for comparative list
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = selectedComparativeCountries.has(c.code);
+            checkbox.addEventListener('click', (e) => {
+                e.stopPropagation(); // prevent setting primary
+                toggleCountryCompare(c.code, checkbox.checked);
+            });
+
+            // Label container for name and click-to-primary action
+            const labelContainer = document.createElement('div');
+            labelContainer.className = 'dropdown-item-label';
+            labelContainer.innerHTML = `
+                <span>${c.name} (${c.englishName})</span>
+                ${c.code === primaryCountry ? '<span class="primary-badge">主要</span>' : ''}
+            `;
+            
+            div.appendChild(checkbox);
+            div.appendChild(labelContainer);
+
+            // Set primary reference country when clicking name
+            div.addEventListener('click', () => {
+                setPrimaryCountry(c.code);
+            });
+
+            itemsContainer.appendChild(div);
         });
+
+        updateDropdownTriggerText();
+    }
+
+    function handleCountrySearch(val) {
+        countrySearchQuery = val.trim();
+        populateCountryDropdown();
+    }
+
+    function toggleCountryCompare(code, checked) {
+        if (checked) {
+            selectedComparativeCountries.add(code);
+        } else {
+            selectedComparativeCountries.delete(code);
+        }
+        updateDropdownTriggerText();
+        renderTable();
+        calculateManualPrice();
+    }
+
+    function setPrimaryCountry(code) {
+        primaryCountry = code;
+        selectedComparativeCountries.add(code); // ensure primary is also in comparative list
+        populateCountryDropdown();
+        renderTable();
+        calculateManualPrice();
+    }
+
+    function toggleAllCountriesSelect(select) {
+        if (select) {
+            Object.keys(shippingRates).forEach(code => selectedComparativeCountries.add(code));
+        } else {
+            selectedComparativeCountries.clear();
+            selectedComparativeCountries.add(primaryCountry); // primary must stay
+        }
+        populateCountryDropdown();
+        renderTable();
+        calculateManualPrice();
+    }
+
+    function selectDefaultPopularCountries() {
+        // Common AliExpress core markets
+        const popular = ['US', 'RU', 'FR', 'ES', 'GB', 'BR', 'CA', 'DE', 'IT', 'KR', 'JP'];
+        selectedComparativeCountries.clear();
+        selectedComparativeCountries.add(primaryCountry);
+        popular.forEach(code => {
+            if (shippingRates[code]) {
+                selectedComparativeCountries.add(code);
+            }
+        });
+        populateCountryDropdown();
+        renderTable();
+        calculateManualPrice();
+    }
+
+    function updateDropdownTriggerText() {
+        const trigger = document.getElementById('countryDropdownTrigger').querySelector('span');
+        if (!shippingRates || !shippingRates[primaryCountry]) {
+            trigger.innerText = '選擇國家...';
+            return;
+        }
+
+        const primaryName = shippingRates[primaryCountry].name;
+        const totalSelected = selectedComparativeCountries.size;
+        trigger.innerText = `${primaryName} (已勾選 ${totalSelected} 個比較國)`;
     }
 
     // Parse "速賣通價格計算工具.xlsx" Product Database
@@ -1084,16 +1461,17 @@
             productsData = {};
             itemOverrides = {};
             competitorPrices = {};
+            expandedRows.clear();
 
             workbook.SheetNames.forEach(sheetName => {
                 const sheet = workbook.Sheets[sheetName];
                 const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                if (rows.length < 2) return; // Skip empty sheets
+                if (rows.length < 2) return; 
 
-                const headers = rows[1]; // Index 1 has our true column headers
+                const headers = rows[1]; 
                 if (!headers) return;
 
-                let nameColIdx = 2; // Default column index heuristics
+                let nameColIdx = 2; 
                 let costColIdx = 3;
 
                 headers.forEach((h, idx) => {
@@ -1109,7 +1487,6 @@
                             costColIdx = idx;
                         }
                         if (val === '售價' || val === '售价') {
-                            // Fallback to 售价 for other sheets
                             if (sheetName !== 'XK' && sheetName !== 'XZ板子') {
                                 costColIdx = idx;
                             }
@@ -1117,7 +1494,6 @@
                     }
                 });
 
-                // Parse item rows from index 2 onwards
                 const items = [];
                 for (let r = 2; r < rows.length; r++) {
                     const row = rows[r];
@@ -1126,15 +1502,14 @@
                     const code = row[nameColIdx];
                     let cost = parseFloat(row[costColIdx]);
 
-                    // Skip rows with missing product code or invalid/zero cost
                     if (code === undefined || code === null || String(code).trim() === '') continue;
-                    if (isNaN(cost)) cost = 0; // Fallback to 0
+                    if (isNaN(cost)) cost = 0; 
 
                     items.push({
                         code: String(code).trim(),
                         cost: cost,
                         rowIdx: r,
-                        originalRow: row, // Preserved for exporting exactly
+                        originalRow: row, 
                         nameColIdx: nameColIdx,
                         costColIdx: costColIdx
                     });
@@ -1145,7 +1520,6 @@
                 }
             });
 
-            // Update Zone State
             const zone = document.getElementById('productsDropZone');
             zone.classList.add('success');
             document.getElementById('prodTitle').innerText = '速賣通產品資料載入成功！';
@@ -1155,7 +1529,6 @@
             fileInfo.innerText = `已讀取 ${Object.keys(productsData).length} 個工作表，共 ${totalProd} 筆商品。`;
             fileInfo.style.display = 'block';
 
-            // Populate tabs
             buildSheetTabs();
             checkVerificationAndShowDashboard();
             return true;
@@ -1163,72 +1536,6 @@
             console.error(err);
             alert('解析速賣通價格計算工具.xlsx失敗！請確保檔案格式正確。');
             return false;
-        }
-    }
-
-    // Auto-load Excel files on page load (if served under HTTP server)
-    async function autoLoadExcelFiles() {
-        const shipTitle = document.getElementById('shipTitle');
-        const prodTitle = document.getElementById('prodTitle');
-        const originalShipTitle = shipTitle.innerText;
-        const originalProdTitle = prodTitle.innerText;
-
-        shipTitle.innerHTML = `<span class="spinner"></span> 正在自動讀取「無憂標準.xlsx」...`;
-        prodTitle.innerHTML = `<span class="spinner"></span> 正在自動讀取「速賣通價格計算工具.xlsx」...`;
-
-        let shipLoaded = false;
-        let prodLoaded = false;
-
-        try {
-            // Fetch 無憂標準.xlsx
-            const shipResponse = await fetch('./無憂標準.xlsx');
-            if (shipResponse.ok) {
-                const shipBuf = await shipResponse.arrayBuffer();
-                shipLoaded = parseShippingData(shipBuf);
-            } else {
-                console.warn('無法自動載入 無憂標準.xlsx, status:', shipResponse.status);
-            }
-        } catch (err) {
-            console.warn('自動載入 無憂標準.xlsx 被 CORS 攔截或檔案不存在:', err);
-        }
-
-        try {
-            // Fetch 速賣通價格計算工具.xlsx
-            const prodResponse = await fetch('./速賣通價格計算工具.xlsx');
-            if (prodResponse.ok) {
-                const prodBuf = await prodResponse.arrayBuffer();
-                prodLoaded = parseProductsData(prodBuf);
-            } else {
-                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodResponse.status);
-            }
-        } catch (err) {
-            console.warn('自動載入 速賣通價格計算工具.xlsx 被 CORS 攔截或檔案不存在:', err);
-        }
-
-        // If autoload failed (CORS blocks under file:/// scheme or files missing)
-        if (!shipLoaded || !prodLoaded) {
-            // Revert titles if they didn't load
-            if (!shipLoaded) {
-                shipTitle.innerText = originalShipTitle;
-            }
-            if (!prodLoaded) {
-                prodTitle.innerText = originalProdTitle;
-            }
-
-            // If we are running under file:/// protocol, display a helpful tip to the user
-            if (window.location.protocol === 'file:') {
-                showCORSAlert();
-            }
-        } else {
-            showToast('已成功自動載入本地 Excel 數據！');
-        }
-    }
-
-    // Show CORS security instructions
-    function showCORSAlert() {
-        const alertBox = document.getElementById('corsAlert');
-        if (alertBox) {
-            alertBox.style.display = 'block';
         }
     }
 
@@ -1255,6 +1562,7 @@
         buttonEl.classList.add('active');
         currentSheet = sheetName;
         currentPage = 1;
+        expandedRows.clear();
         renderTable();
     }
 
@@ -1265,16 +1573,47 @@
         }
     }
 
-    // Cargo type toggle: General vs Special Cargo
+    // Cargo type toggle
     function setCargoType(special) {
         isSpecialCargo = special;
         document.getElementById('typeGeneral').classList.toggle('active', !special);
         document.getElementById('typeSpecial').classList.toggle('active', special);
         currentPage = 1;
         renderTable();
+        calculateManualPrice();
     }
 
-    // Core Shipping Engine Calculation - returns base rate
+    // Pricing option toggle for Exclude Shipping
+    function toggleExcludeShipping() {
+        excludeShippingFee = document.getElementById('excludeShippingToggle').checked;
+        renderTable();
+        calculateManualPrice();
+    }
+
+    // Interactive Bidirectional Currency Converter
+    function convertCurrency(source) {
+        const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
+        const quickUSD = document.getElementById('quickUSD');
+        const quickRMB = document.getElementById('quickRMB');
+
+        if (source === 'usd') {
+            const val = parseFloat(quickUSD.value);
+            if (!isNaN(val)) {
+                quickRMB.value = (val * exchRate).toFixed(2);
+            } else {
+                quickRMB.value = '';
+            }
+        } else {
+            const val = parseFloat(quickRMB.value);
+            if (!isNaN(val)) {
+                quickUSD.value = (val / exchRate).toFixed(2);
+            } else {
+                quickUSD.value = '';
+            }
+        }
+    }
+
+    // Core Shipping Engine Calculation
     function calculateBaseShippingRMB(countryCode, weightKg, isSpecial) {
         if (!shippingRates || !shippingRates[countryCode]) return 0;
         const rates = shippingRates[countryCode];
@@ -1282,7 +1621,6 @@
 
         if (weightKg <= 2.0) {
             if (!isSpecial) {
-                // General Goods (普貨) Weight brackets
                 if (weightKg <= 0.150) {
                     baseFee = weightKg * rates.general_0_150_ship + rates.general_0_150_reg;
                 } else if (weightKg <= 0.300) {
@@ -1291,11 +1629,9 @@
                     baseFee = weightKg * rates.general_300_2000_ship + rates.general_300_2000_reg;
                 }
             } else {
-                // Special Goods (非普貨, e.g. batteries)
                 baseFee = weightKg * rates.special_0_2000_ship + rates.special_0_2000_reg;
             }
         } else {
-            // Large parcel (>2kg) Calculation
             const step = Math.ceil((weightKg - 0.5) * 2);
             baseFee = rates.large_first_0_5kg + step * rates.large_next_0_5kg;
         }
@@ -1303,15 +1639,122 @@
         return baseFee;
     }
 
+    // Single Product Manual Calculator logic
+    function calculateManualPrice() {
+        const resultPanel = document.getElementById('manualResultPanel');
+        if (!shippingRates) {
+            resultPanel.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 0.85rem;">⚠️ 請先在下方「1. 匯入無憂標準.xlsx」載入國家運費資料，以啟動快速試算。</div>`;
+            return;
+        }
+
+        // Gather manual inputs
+        const cost = parseFloat(document.getElementById('manualCost').value) || 0;
+        const weight = parseFloat(document.getElementById('manualWeight').value) || 0;
+        const discount = parseFloat(document.getElementById('manualDiscount').value) || 0;
+        const competitorUSD = parseFloat(document.getElementById('manualCompetitorPrice').value);
+
+        // Global core settings
+        const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
+        const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
+        const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
+        const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
+        const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
+        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
+
+        const targetMargin = targetMargPercentage / 100;
+        const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
+        const totalCostRMB = cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+
+        // Suggested formulas
+        const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+        const totalDiscount = Math.min(99, discount + extraDisc);
+        const netDiscountFactor = 1 - totalDiscount / 100;
+
+        let saleUSD = (totalCostRMB * (1 + targetMargin)) / (exchRate * netPlatformFactor);
+        let retailUSD = saleUSD / netDiscountFactor;
+
+        // Check Exclude Shipping toggle
+        if (excludeShippingFee) {
+            const shipUSD = shippingRMB / exchRate;
+            saleUSD = Math.max(0.01, saleUSD - shipUSD);
+            retailUSD = Math.max(0.01, retailUSD - shipUSD);
+        }
+
+        const saleRMB = saleUSD * exchRate;
+        const retailRMB = retailUSD * exchRate;
+
+        // Render Results Panel
+        let html = `
+            <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準運費</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[primaryCountry].name} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
+            </div>
+            <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含手續報關)</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${totalCostRMB.toFixed(2)}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國內 ¥${domesticShippingRMB} | 報關 ¥${customsFeeRMB}</div>
+            </div>
+            <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
+                    建議特價 (買家實付)
+                    ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                </div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-green); margin-top: 0.25rem;">
+                    $${saleUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${saleRMB.toFixed(2)}</span>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">利潤目標: ${targetMargPercentage}% | 平台: ${platformFeeRate}%</div>
+            </div>
+            <div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
+                    建議零售價 (刊登價格)
+                    ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                </div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-pink); margin-top: 0.25rem;">
+                    $${retailUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${retailRMB.toFixed(2)}</span>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">刊登折扣: ${totalDiscount}% (${Math.round(platformFeeRate)}+${Math.round(discount)}%)</div>
+            </div>
+        `;
+
+        // If competitor price entered, calculate competitor profit
+        if (!isNaN(competitorUSD) && competitorUSD > 0) {
+            const competitorRMB = competitorUSD * exchRate;
+            const competitorFeeRMB = competitorRMB * (platformFeeRate / 100);
+            const competitorNetRevenueRMB = competitorRMB - competitorFeeRMB;
+            const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
+            const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
+            const isPositive = competitorProfitRMB >= 0;
+            const profitColor = isPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
+
+            html += `
+                <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="font-size: 0.82rem; font-weight: 600; color: var(--accent-cyan);">⚔️ 對手利潤逆推試算結果:</div>
+                    <div style="display: flex; gap: 1.5rem; font-size: 0.85rem;">
+                        <div>對手售價: <strong style="color: #fff;">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
+                        <div>對手佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
+                        <div>對手淨利潤: <strong style="color: ${profitColor};">${isPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</strong></div>
+                        <div>對手實際利潤率: <strong style="color: ${profitColor};">${competitorProfitRate.toFixed(2)}%</strong></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        resultPanel.innerHTML = html;
+    }
+
     // UI Updates on Global Configuration Input
     function updateGlobalSettings() {
         renderTable();
+        calculateManualPrice();
+        convertCurrency('usd'); // update converter values if rate changed
     }
 
     // Search and Pagination Controls
     function handleSearch() {
         searchQuery = document.getElementById('searchBar').value.toLowerCase().trim();
         currentPage = 1;
+        expandedRows.clear();
         renderTable();
     }
 
@@ -1319,18 +1762,141 @@
         if (confirm('確定要清除所有手動編輯過的商品定價、利潤率、重量與活動折扣微調，全部重置回全球核心參數設定嗎？')) {
             itemOverrides = {};
             competitorPrices = {};
+            expandedRows.clear();
             renderTable();
+            calculateManualPrice();
             showToast('所有微調已成功重置！');
         }
+    }
+
+    function toggleExpandRow(itemKey) {
+        const expRow = document.getElementById(`row-exp-${itemKey}`);
+        const expBtn = document.getElementById(`btn-exp-${itemKey}`);
+        const isCollapsed = expRow.style.display === 'none';
+
+        if (isCollapsed) {
+            expRow.style.display = 'table-row';
+            expBtn.innerText = '▼';
+            expBtn.style.transform = 'rotate(90deg)';
+            expandedRows.add(itemKey);
+            renderExpandedDetail(itemKey);
+        } else {
+            expRow.style.display = 'none';
+            expBtn.innerText = '▶';
+            expBtn.style.transform = 'rotate(0deg)';
+            expandedRows.delete(itemKey);
+        }
+    }
+
+    // Renders the sub-table comparative data inside expanded rows
+    function renderExpandedDetail(itemKey) {
+        const detailContainer = document.getElementById(`body-exp-${itemKey}`);
+        if (!detailContainer) return;
+
+        if (selectedComparativeCountries.size === 0) {
+            detailContainer.innerHTML = `
+                <tr>
+                    <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 0.8rem; font-size: 0.8rem;">
+                        💡 請點擊上方目的地國家下拉選單，並在左側「打勾」多個國家來進行跨國定價對比！
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Find the product item
+        const sheets = Object.keys(productsData);
+        let currentItem = null;
+        let foundSheet = '';
+        for (let s of sheets) {
+            const match = productsData[s].find(i => `${s}_${i.code}` === itemKey);
+            if (match) {
+                currentItem = match;
+                foundSheet = s;
+                break;
+            }
+        }
+
+        if (!currentItem) return;
+
+        const override = itemOverrides[itemKey] || {};
+        const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
+        const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
+        const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
+        const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
+        const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
+
+        const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
+        const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
+        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
+
+        const weight = (override.weight !== undefined) ? override.weight : defaultWt;
+        const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
+        const margin = (override.margin !== undefined) ? override.margin : (targetMargPercentage / 100);
+
+        let html = '';
+
+        selectedComparativeCountries.forEach(code => {
+            if (!shippingRates[code]) return;
+            const rates = shippingRates[code];
+
+            const shippingRMB = calculateBaseShippingRMB(code, weight, isSpecialCargo);
+            const totalCostRMB = currentItem.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+
+            const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+            const totalDiscount = Math.min(99, activityDiscount + extraDisc);
+            const netDiscountFactor = 1 - totalDiscount / 100;
+
+            let saleUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+            let retailUSD = saleUSD / netDiscountFactor;
+
+            if (excludeShippingFee) {
+                const shipUSD = shippingRMB / exchRate;
+                saleUSD = Math.max(0.01, saleUSD - shipUSD);
+                retailUSD = Math.max(0.01, retailUSD - shipUSD);
+            }
+
+            const saleRMB = saleUSD * exchRate;
+            const retailRMB = retailUSD * exchRate;
+
+            // Competitor Analysis part
+            const competitorUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : saleUSD;
+            const competitorRMB = competitorUSD * exchRate;
+            const competitorFeeRMB = competitorRMB * (platformFeeRate / 100);
+            const competitorNetRevenueRMB = competitorRMB - competitorFeeRMB;
+            const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
+            const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
+
+            const isPositive = competitorProfitRMB >= 0;
+            const profitColor = isPositive ? '#10b981' : '#ec4899';
+            const primaryMarker = code === primaryCountry ? '<span style="color:var(--primary); font-weight:700;">★ </span>' : '';
+
+            html += `
+                <tr style="${code === primaryCountry ? 'background: rgba(139, 92, 246, 0.08);' : ''}">
+                    <td style="font-weight:600; padding: 0.3rem 0.5rem;">${primaryMarker}${rates.name} (${rates.code})</td>
+                    <td style="text-align:center; padding: 0.3rem 0.5rem;">${weight.toFixed(3)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">¥${shippingRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem;">¥${totalCostRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:#10b981;">¥${saleRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:#10b981;">$${saleUSD.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:#a78bfa;">¥${retailRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:#a78bfa;">$${retailUSD.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">$${competitorUSD.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:700; color:${profitColor};">${isPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</td>
+                    <td style="text-align:center; font-weight:700; color:${profitColor}; padding: 0.3rem 0.5rem;">${competitorProfitRate.toFixed(2)}%</td>
+                </tr>
+            `;
+        });
+
+        detailContainer.innerHTML = html;
     }
 
     // Dynamic UI Table Rendering
     function renderTable() {
         const tableBody = document.getElementById('tableBody');
-        const countryCode = document.getElementById('globalCountry').value;
 
-        if (!countryCode) {
-            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">⚠️ 請先在上方「全球核心參數設定」中選擇目的地國家以計算運費。</td></tr>`;
+        if (!shippingRates || !primaryCountry) {
+            tableBody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">⚠️ 請先在上方「目的地國家/地區」中選擇或勾選國家以開啟計算。</td></tr>`;
             document.getElementById('paginationInfo').innerText = '顯示第 0 至 0 筆，共 0 筆';
             document.getElementById('paginationControls').innerHTML = '';
             return;
@@ -1340,7 +1906,6 @@
 
         const allItems = productsData[currentSheet];
 
-        // Filter items
         const filteredItems = allItems.filter(item => {
             if (!searchQuery) return true;
             return item.code.toLowerCase().includes(searchQuery);
@@ -1348,13 +1913,12 @@
 
         const totalItems = filteredItems.length;
         if (totalItems === 0) {
-            tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">🔍 找不到與「${searchQuery}」匹配的商品。</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">🔍 找不到與「${searchQuery}」匹配的商品。</td></tr>`;
             document.getElementById('paginationInfo').innerText = '顯示第 0 至 0 筆，共 0 筆';
             document.getElementById('paginationControls').innerHTML = '';
             return;
         }
 
-        // Pagination bounds
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
@@ -1370,10 +1934,9 @@
         const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
         const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
 
-        // New global inputs
         const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
         const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
-        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 0;
+        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
 
         const targetMargin = targetMargPercentage / 100;
 
@@ -1383,58 +1946,68 @@
             const itemKey = `${currentSheet}_${item.code}`;
             const override = itemOverrides[itemKey] || {};
 
-            // 1. Determine Weight (row override vs global default)
             const weight = (override.weight !== undefined) ? override.weight : defaultWt;
-
-            // 2. Determine Activity Discount (row override vs global default)
             const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
-
-            // 3. Calculate fixed Shipping Fee based strictly on weight!
-            const shippingRMB = calculateBaseShippingRMB(countryCode, weight, isSpecialCargo);
-
-            // 4. Determine Profit Margin (from override or default)
+            const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
             const margin = (override.margin !== undefined) ? override.margin : targetMargin;
 
-            // 5. Calculate Selling Prices based on the target Margin and platform fee
-            // Total Cost = COGS + Domestic Shipping + International Shipping + Customs Fee
             const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
-            // Prevent division by zero if platform fee rate >= 100% or discount >= 100%
             const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
             const totalDiscount = Math.min(99, activityDiscount + extraDisc);
             const netDiscountFactor = 1 - totalDiscount / 100;
 
-            const salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
-            const retailPriceUSD = salePriceUSD / netDiscountFactor;
+            let salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+            let retailPriceUSD = salePriceUSD / netDiscountFactor;
 
-            // Create Row Element with explicit Grid Borders
+            // Apply Exclude Shipping toggle
+            if (excludeShippingFee) {
+                const shipUSD = shippingRMB / exchRate;
+                salePriceUSD = Math.max(0.01, salePriceUSD - shipUSD);
+                retailPriceUSD = Math.max(0.01, retailPriceUSD - shipUSD);
+            }
+
+            const salePriceRMB = salePriceUSD * exchRate;
+            const retailPriceRMB = retailPriceUSD * exchRate;
+
+            const isExpanded = expandedRows.has(itemKey);
+
+            // Item Main Row
             const tr = document.createElement('tr');
+            tr.id = `row-main-${itemKey}`;
+
             if (currentViewMode === 'pricing') {
-                const salePriceRMB = salePriceUSD * exchRate;
-                const retailPriceRMB = retailPriceUSD * exchRate;
-                
                 tr.innerHTML = `
+                    <td style="text-align: center;">
+                        <span class="expand-btn" id="btn-exp-${itemKey}" onclick="toggleExpandRow('${itemKey}')">${isExpanded ? '▼' : '▶'}</span>
+                    </td>
                     <td style="text-align: center;"><span class="badge badge-purple">${currentSheet}</span></td>
                     <td style="font-weight:600; color:#fff;">${item.code}</td>
-                    <td style="font-weight:500; text-align: right; padding-right: 1.5rem;">¥${item.cost.toFixed(2)}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem;">¥${item.cost.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0.001" value="${weight.toFixed(3)}" 
-                            onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:80px;">
+                            onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:70px;">
                     </td>
                     <td style="text-align: center; white-space: nowrap;">
-                        <span style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-right:4px;">${Math.round(platformFeeRate)} +</span>
+                        <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted); margin-right:3px;">${Math.round(platformFeeRate)}+</span>
                         <input type="number" class="table-input" step="1" min="0" max="100" value="${Math.round(activityDiscount)}" 
-                            onchange="handleRowOverride('${item.code}', 'activityDiscount', this.value)" style="width:65px;"> <span style="font-size:0.85rem; color:var(--text-muted);">%</span>
+                            onchange="handleRowOverride('${item.code}', 'activityDiscount', this.value)" style="width:50px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
                     </td>
-                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 1.5rem;">¥${shippingRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="1" min="-99" max="99" value="${Math.round(margin * 100)}" 
-                            onchange="handleRowOverride('${item.code}', 'margin', this.value)" style="width:70px;"> <span style="font-size:0.85rem; color:var(--text-muted);">%</span>
+                            onchange="handleRowOverride('${item.code}', 'margin', this.value)" style="width:55px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
                     </td>
-                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 1rem;">¥${salePriceRMB.toFixed(2)}</td>
-                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 1rem;">$${salePriceUSD.toFixed(2)}</td>
-                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 1rem;">¥${retailPriceRMB.toFixed(2)}</td>
-                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 1rem;">$${retailPriceUSD.toFixed(2)}</td>
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.6rem;">
+                        ¥${salePriceRMB.toFixed(2)}
+                        ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
+                    </td>
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.6rem;">$${salePriceUSD.toFixed(2)}</td>
+                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 0.6rem;">
+                        ¥${retailPriceRMB.toFixed(2)}
+                        ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
+                    </td>
+                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 0.6rem;">$${retailPriceUSD.toFixed(2)}</td>
                 `;
             } else {
                 const competitorPriceUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : salePriceUSD;
@@ -1450,31 +2023,75 @@
                 const absProfitVal = Math.abs(competitorProfitRMB).toFixed(2);
                 
                 tr.innerHTML = `
+                    <td style="text-align: center;">
+                        <span class="expand-btn" id="btn-exp-${itemKey}" onclick="toggleExpandRow('${itemKey}')">${isExpanded ? '▼' : '▶'}</span>
+                    </td>
                     <td style="text-align: center;"><span class="badge badge-purple">${currentSheet}</span></td>
                     <td style="font-weight:600; color:#fff;">${item.code}</td>
-                    <td style="font-weight:500; text-align: right; padding-right: 1.5rem;">¥${item.cost.toFixed(2)}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem;">¥${item.cost.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0.001" value="${weight.toFixed(3)}" 
-                            onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:80px;">
+                            onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:70px;">
                     </td>
-                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 1.5rem;">¥${shippingRMB.toFixed(2)}</td>
-                    <td style="font-weight:500; text-align: right; padding-right: 1.5rem; color: #fff;">¥${totalCostRMB.toFixed(2)}</td>
-                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 1.5rem;">¥${competitorPriceRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: #fff;">¥${totalCostRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${competitorPriceRMB.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0" value="${competitorPriceUSD.toFixed(2)}" 
-                            onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:90px; border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05);">
+                            onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:80px; border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05);">
                     </td>
-                    <td class="highlight-text" style="text-align: right; padding-right: 1.5rem; ${profitColorStyle}">${profitSymbol}${absProfitVal}</td>
+                    <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; ${profitColorStyle}">${profitSymbol}${absProfitVal}</td>
                     <td class="highlight-text" style="text-align: center; ${profitColorStyle}">${competitorProfitRate.toFixed(2)}%</td>
+                    <td style="color:var(--text-muted); font-size:0.75rem; text-align:center;">-</td>
                 `;
             }
             tableBody.appendChild(tr);
+
+            // Item Expand Row (Sub-table)
+            const expTr = document.createElement('tr');
+            expTr.id = `row-exp-${itemKey}`;
+            expTr.style.display = isExpanded ? 'table-row' : 'none';
+            expTr.innerHTML = `
+                <td colspan="12" style="padding: 0.4rem 0.75rem; background: rgba(15, 23, 42, 0.45);">
+                    <div style="border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden; background: rgba(10, 15, 26, 0.9); padding: 0.4rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.3rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px; height:14px; stroke:var(--accent-cyan);">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m0 18l6-3m-6 3V2m6 15l5.447 2.724A1 1 0 0021 18.82V8.058a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 2" />
+                            </svg>
+                            自選比較國家/地區 多國定價分析結果 (商品型號: ${item.code})
+                        </div>
+                        <table style="width: 100%; font-size: 0.76rem; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(255,255,255,0.03);">
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem;">對比國家</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">計費重量 (KG)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">無憂標準運費</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">總成本 (RMB)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議特價 (RMB)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議特價 (USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議零售 (RMB)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議零售 (USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">對手售價 (USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">對手利潤 (RMB)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">對手利潤率 (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body-exp-${itemKey}">
+                                <!-- Computed dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            `;
+            tableBody.appendChild(expTr);
+
+            if (isExpanded) {
+                renderExpandedDetail(itemKey);
+            }
         });
 
-        // Update Pagination Info
         document.getElementById('paginationInfo').innerText = `顯示第 ${startIdx + 1} 至 ${endIdx} 筆，共 ${totalItems} 筆商品`;
-
-        // Render Pagination buttons
         buildPaginationControls(totalPages);
     }
 
@@ -1484,11 +2101,10 @@
 
         if (totalPages <= 1) return;
 
-        // Previous button
         const prevBtn = document.createElement('button');
         prevBtn.className = 'page-btn';
         prevBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px; height:14px;">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
             </svg>
         `;
@@ -1501,7 +2117,6 @@
         };
         container.appendChild(prevBtn);
 
-        // Page number buttons logic
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, currentPage + 2);
 
@@ -1516,7 +2131,7 @@
                 const dots = document.createElement('span');
                 dots.innerText = '...';
                 dots.style.color = 'var(--text-muted)';
-                dots.style.padding = '0 0.25rem';
+                dots.style.padding = '0 0.2rem';
                 container.appendChild(dots);
             }
         }
@@ -1534,7 +2149,7 @@
                 const dots = document.createElement('span');
                 dots.innerText = '...';
                 dots.style.color = 'var(--text-muted)';
-                dots.style.padding = '0 0.25rem';
+                dots.style.padding = '0 0.2rem';
                 container.appendChild(dots);
             }
 
@@ -1545,11 +2160,10 @@
             container.appendChild(btn);
         }
 
-        // Next button
         const nextBtn = document.createElement('button');
         nextBtn.className = 'page-btn';
         nextBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px; height:16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px; height:14px;">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
             </svg>
         `;
@@ -1582,21 +2196,21 @@
         }
 
         renderTable();
+        calculateManualPrice();
     }
 
     // Set active view mode and re-render
     function setViewMode(mode) {
         currentViewMode = mode;
         
-        // Update active class on toggle buttons
         document.getElementById('viewPricingBtn').classList.toggle('active', mode === 'pricing');
         document.getElementById('viewCompetitorBtn').classList.toggle('active', mode === 'competitor');
         
-        // Update table headers dynamically
         const thead = document.getElementById('tableHeader');
         if (mode === 'pricing') {
             thead.innerHTML = `
                 <tr>
+                    <th style="width: 40px; text-align: center;">展開</th>
                     <th>商品工作表</th>
                     <th>商品編號</th>
                     <th>採購成本 (RMB)</th>
@@ -1613,6 +2227,7 @@
         } else {
             thead.innerHTML = `
                 <tr>
+                    <th style="width: 40px; text-align: center;">展開</th>
                     <th>商品工作表</th>
                     <th>商品編號</th>
                     <th>採購成本 (RMB)</th>
@@ -1623,15 +2238,17 @@
                     <th>對手含運售價 (USD)</th>
                     <th>對手淨利潤 (RMB)</th>
                     <th>對手實際利潤率 (%)</th>
+                    <th style="text-align: center;">說明</th>
                 </tr>
             `;
         }
         
         currentPage = 1;
+        expandedRows.clear();
         renderTable();
     }
 
-    // Handles interactive inline competitor price updates
+    // Handles interactive competitor price updates
     function handleCompetitorPriceOverride(productCode, value) {
         const itemKey = `${currentSheet}_${productCode}`;
         const val = parseFloat(value);
@@ -1639,6 +2256,7 @@
         
         competitorPrices[itemKey] = val;
         renderTable();
+        calculateManualPrice();
     }
 
     // Client-side Excel calculations export
@@ -1648,13 +2266,12 @@
             return;
         }
 
-        const countryCode = document.getElementById('globalCountry').value;
-        if (!countryCode) {
+        if (!primaryCountry) {
             alert('請選擇一個目的地國家再進行導出！');
             return;
         }
 
-        const country = shippingRates[countryCode];
+        const country = shippingRates[primaryCountry];
         const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
         const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
         const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
@@ -1663,11 +2280,10 @@
 
         const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
         const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
-        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 0;
+        const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
 
         const targetMargin = targetMargPercentage / 100;
 
-        // Spinner state
         const exportBtn = document.getElementById('exportBtn');
         const originalHtml = exportBtn.innerHTML;
         exportBtn.disabled = true;
@@ -1675,25 +2291,20 @@
 
         setTimeout(() => {
             try {
-                // We create a copy of all worksheets
                 const newWorkbook = XLSX.utils.book_new();
 
                 Object.keys(productsData).forEach(sheetName => {
                     const items = productsData[sheetName];
                     
-                    // Reconstruct rows by keeping all original columns plus appended calculations
                     let maxCols = 0;
                     items.forEach(item => {
                         if (item.originalRow.length > maxCols) maxCols = item.originalRow.length;
                     });
 
-                    // Build a temporary array representation of sheet rows
                     const sheetRows = [];
                     
-                    // Row 0 is the original title (index 0)
-                    sheetRows[0] = ["商品信息"]; // Default title
+                    sheetRows[0] = ["商品信息 - " + (excludeShippingFee ? "已扣除運費報價模式" : "含運費報價模式")]; 
                     
-                    // Rebuild true headers
                     let targetHeaders = [];
                     if (sheetName === 'XK') {
                         targetHeaders = ['行号', '图', '商品编号', '成本', '商品备注', '', '', '', '', '', '', '', '', '', '', '', '', '', '滿減'];
@@ -1703,19 +2314,17 @@
                         targetHeaders = ['行号', '图', '商品编号', '售价', '商品备注'];
                     }
 
-                    // Append new columns
                     const newHeaders = [...targetHeaders];
-                    // Extend to match max columns
                     while (newHeaders.length < maxCols) newHeaders.push("");
                     
                     if (currentViewMode === 'pricing') {
                         newHeaders.push("計費重量(KG)");
                         newHeaders.push("活動折扣(%)");
                         newHeaders.push("無憂標準運費(RMB)");
-                        newHeaders.push("特價(RMB)");
-                        newHeaders.push("特價(USD)");
-                        newHeaders.push("零售價(RMB)");
-                        newHeaders.push("零售價(USD)");
+                        newHeaders.push("特價(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("特價(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("零售價(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("零售價(USD)" + (excludeShippingFee ? "[不含運]" : ""));
                         newHeaders.push("實際利潤率(%)");
                     } else {
                         newHeaders.push("計費重量(KG)");
@@ -1730,22 +2339,14 @@
 
                     sheetRows[1] = newHeaders;
 
-                    // Fill in data rows
                     items.forEach(item => {
                         const rIdx = item.rowIdx;
                         const itemKey = `${sheetName}_${item.code}`;
                         const override = itemOverrides[itemKey] || {};
 
-                        // Weight
                         const weight = (override.weight !== undefined) ? override.weight : defaultWt;
-
-                        // Activity Discount Override
                         const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
-
-                        // Shipping calculation
-                        const shippingRMB = calculateBaseShippingRMB(countryCode, weight, isSpecialCargo);
-
-                        // Margin & Price calculations
+                        const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
                         const margin = (override.margin !== undefined) ? override.margin : targetMargin;
 
                         const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
@@ -1753,13 +2354,18 @@
                         const totalDiscount = Math.min(99, activityDiscount + extraDisc);
                         const netDiscountFactor = 1 - totalDiscount / 100;
 
-                        const salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
-                        const retailPriceUSD = salePriceUSD / netDiscountFactor;
-                        
+                        let salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+                        let retailPriceUSD = salePriceUSD / netDiscountFactor;
+
+                        if (excludeShippingFee) {
+                            const shipUSD = shippingRMB / exchRate;
+                            salePriceUSD = Math.max(0.01, salePriceUSD - shipUSD);
+                            retailPriceUSD = Math.max(0.01, retailPriceUSD - shipUSD);
+                        }
+
                         const salePriceRMB = salePriceUSD * exchRate;
                         const retailPriceRMB = retailPriceUSD * exchRate;
 
-                        // Build original row array and append calculations
                         const originalRowCopy = [...item.originalRow];
                         while (originalRowCopy.length < maxCols) originalRowCopy.push("");
 
@@ -1793,7 +2399,6 @@
                         sheetRows[rIdx] = originalRowCopy;
                     });
 
-                    // Pad empty indices
                     for (let r = 0; r < sheetRows.length; r++) {
                         if (!sheetRows[r]) sheetRows[r] = [];
                     }
@@ -1802,8 +2407,7 @@
                     XLSX.utils.book_append_sheet(newWorkbook, newSheet, sheetName);
                 });
 
-                // Generate and download
-                const filename = `速賣通價格定價結果_${country.name}_${isSpecialCargo ? '非普貨' : '普貨'}.xlsx`;
+                const filename = `速賣通價格定價結果_${country.name}_${isSpecialCargo ? '非普貨' : '普貨'}${excludeShippingFee ? '_不含運' : ''}.xlsx`;
                 XLSX.writeFile(newWorkbook, filename);
                 showToast(`定價表格導出成功！`);
             } catch (err) {
@@ -1816,7 +2420,67 @@
         }, 150);
     }
 
-    // Helper: Show notification toast
+    // Auto-load Excel files on page load (if served under HTTP server)
+    async function autoLoadExcelFiles() {
+        const shipTitle = document.getElementById('shipTitle');
+        const prodTitle = document.getElementById('prodTitle');
+        const originalShipTitle = shipTitle.innerText;
+        const originalProdTitle = prodTitle.innerText;
+
+        shipTitle.innerHTML = `<span class="spinner"></span> 正在自動讀取「無憂標準.xlsx」...`;
+        prodTitle.innerHTML = `<span class="spinner"></span> 正在自動讀取「速賣通價格計算工具.xlsx」...`;
+
+        let shipLoaded = false;
+        let prodLoaded = false;
+
+        try {
+            const shipResponse = await fetch('./無憂標準.xlsx');
+            if (shipResponse.ok) {
+                const shipBuf = await shipResponse.arrayBuffer();
+                shipLoaded = parseShippingData(shipBuf);
+            } else {
+                console.warn('無法自動載入 無憂標準.xlsx, status:', shipResponse.status);
+            }
+        } catch (err) {
+            console.warn('自動載入 無憂標準.xlsx 被 CORS 攔截或檔案不存在:', err);
+        }
+
+        try {
+            const prodResponse = await fetch('./速賣通價格計算工具.xlsx');
+            if (prodResponse.ok) {
+                const prodBuf = await prodResponse.arrayBuffer();
+                prodLoaded = parseProductsData(prodBuf);
+            } else {
+                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodResponse.status);
+            }
+        } catch (err) {
+            console.warn('自動載入 速賣通價格計算工具.xlsx 被 CORS 攔截或檔案不存在:', err);
+        }
+
+        if (!shipLoaded || !prodLoaded) {
+            if (!shipLoaded) {
+                shipTitle.innerText = originalShipTitle;
+            }
+            if (!prodLoaded) {
+                prodTitle.innerText = originalProdTitle;
+            }
+
+            if (window.location.protocol === 'file:') {
+                showCORSAlert();
+            }
+        } else {
+            showToast('已成功自動載入本地 Excel 數據！');
+        }
+    }
+
+    // Show CORS security instructions
+    function showCORSAlert() {
+        const alertBox = document.getElementById('corsAlert');
+        if (alertBox) {
+            alertBox.style.display = 'block';
+        }
+    }
+
     function showToast(msg) {
         const toast = document.getElementById('toast');
         toast.innerText = msg;
