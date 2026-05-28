@@ -862,7 +862,13 @@
             </svg>
             📊 單件商品手動快速試算區 (無須匯入 Excel 即可使用)
         </h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+        <!-- 試算模式分頁 (售價在前，利潤率在後) -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.6rem;">
+            <button id="manualModePriceBtn" class="tab-btn active" onclick="setManualCalcMode('price')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.82rem; border-radius: 20px;">💰 依自訂售價換算實際利潤</button>
+            <button id="manualModeMarginBtn" class="tab-btn" onclick="setManualCalcMode('margin')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.82rem; border-radius: 20px;">📈 依目標利潤率推算建議售價</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
             <!-- 1. 目的地國家 -->
             <div class="input-group" style="position: relative;">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">試算目的地國家</label>
@@ -893,32 +899,32 @@
                 <label style="color: var(--accent-green); font-size: 0.72rem;">平台手續費 (%)</label>
                 <input type="number" id="manualPlatformFee" class="input-control" value="10" step="0.1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
-            <!-- 4. 我想要的利潤 -->
-            <div class="input-group">
+            <!-- 4. 自訂售價 (RMB) 換算利潤 -->
+            <div class="input-group" id="manualSellingPriceInputGroup">
+                <label style="color: var(--accent-green); font-size: 0.72rem;">自訂售價 (RMB - 換算實際利潤)</label>
+                <input type="number" id="manualSellingPriceRMB" class="input-control" value="120" placeholder="自訂售價試算利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            </div>
+            <!-- 5. 我想要的利潤 (目標利潤率) -->
+            <div class="input-group" id="manualMarginInputGroup" style="display: none;">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">我想要的利潤 (%)</label>
                 <input type="number" id="manualMargin" class="input-control" value="20" step="1" min="-99" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
-            <!-- 自訂售價 (RMB) 換算利潤 -->
-            <div class="input-group">
-                <label style="color: var(--accent-green); font-size: 0.72rem;">自訂售價 (RMB - 換算實際利潤)</label>
-                <input type="number" id="manualSellingPriceRMB" class="input-control" placeholder="自訂售價試算利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
-            </div>
-            <!-- 5. 重量 -->
+            <!-- 6. 重量 -->
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">重量 (商品重量 KG)</label>
                 <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
-            <!-- 6. 活動折扣 (%) -->
+            <!-- 7. 活動折扣 (%) -->
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">活動折扣 (%)</label>
                 <input type="number" id="manualDiscount" class="input-control" value="30" step="1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
-            <!-- 7. 對手價格 (含平台手續) -->
+            <!-- 8. 對手價格 (含平台手續) -->
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem;">對手含運售價 (USD - 選填)</label>
                 <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="試算對手利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
-            <!-- 8. 將運費併入售價 -->
+            <!-- 9. 將運費併入售價 -->
             <div class="input-group" style="justify-content: center; align-items: flex-start; height: 100%;">
                 <label style="display: flex; align-items: center; gap: 0.45rem; cursor: pointer; user-select: none; margin-top: 1.35rem;">
                     <input type="checkbox" id="manualMergeShippingToggle" checked onchange="toggleManualMergeShipping()" style="width: 16px; height: 16px; accent-color: var(--accent-green); cursor: pointer;">
@@ -1209,6 +1215,30 @@
 
     // Set of expanded product row keys
     let expandedRows = new Set();
+
+    let manualCalcMode = 'price'; // 'price' or 'margin'
+
+    function setManualCalcMode(mode) {
+        manualCalcMode = mode;
+        
+        const priceBtn = document.getElementById('manualModePriceBtn');
+        const marginBtn = document.getElementById('manualModeMarginBtn');
+        const priceGroup = document.getElementById('manualSellingPriceInputGroup');
+        const marginGroup = document.getElementById('manualMarginInputGroup');
+        
+        if (mode === 'price') {
+            priceBtn.classList.add('active');
+            marginBtn.classList.remove('active');
+            priceGroup.style.display = 'flex';
+            marginGroup.style.display = 'none';
+        } else {
+            priceBtn.classList.remove('active');
+            marginBtn.classList.add('active');
+            priceGroup.style.display = 'none';
+            marginGroup.style.display = 'flex';
+        }
+        calculateManualPrice();
+    }
 
     // Event Bindings for Drag & Drop / Selection
     document.addEventListener('DOMContentLoaded', () => {
@@ -1851,39 +1881,95 @@
         const saleRMB = saleUSD * exchRate;
         const retailRMB = retailUSD * exchRate;
 
-        // Render Results Panel
-        let html = `
-            <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準運費</div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
-            </div>
-            <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含平台手續)</div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${displayedTotalCostRMB.toFixed(2)}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
-            </div>
-            <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
-                    建議特價 (買家實付)
-                    ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+        let html = '';
+
+        if (manualCalcMode === 'price') {
+            // ==================== MODE 1: VIEW BY SELLING PRICE ====================
+            const myPriceRMB = isNaN(mySellingPriceRMB) ? (displayedTotalCostRMB * 1.2) : mySellingPriceRMB;
+            const myGrossPriceRMB = excludeShippingFee ? (myPriceRMB + shippingRMB) : myPriceRMB;
+            const myCommissionRMB = myGrossPriceRMB * (platformFeeRate / 100);
+            const myNetRevenueRMB = myGrossPriceRMB - myCommissionRMB;
+            const myProfitRMB = myNetRevenueRMB - totalCostRMB;
+            const myProfitRate = (myProfitRMB / totalCostRMB) * 100;
+            const isMyCustomPositive = myProfitRMB >= 0;
+            const myCustomProfitColor = isMyCustomPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
+            const myPriceUSD = myPriceRMB / exchRate;
+            const myProfitUSD = myProfitRMB / exchRate;
+
+            html = `
+                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準運費</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
                 </div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-green); margin-top: 0.25rem;">
-                    $${saleUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${saleRMB.toFixed(2)}</span>
+                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含平台手續)</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${displayedTotalCostRMB.toFixed(2)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">利潤目標: ${targetMargPercentage}% | 平台: ${platformFeeRate}%</div>
-            </div>
-            <div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
-                    建議零售價 (刊登價格)
-                    ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">自訂售價實際利潤率</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: ${myCustomProfitColor}; margin-top: 0.15rem;">
+                        ${myProfitRate.toFixed(2)}%
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">輸入售價: ¥${myPriceRMB.toFixed(2)} ($${myPriceUSD.toFixed(2)})</div>
                 </div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-pink); margin-top: 0.25rem;">
-                    $${retailUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${retailRMB.toFixed(2)}</span>
+                <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">自訂售價淨利潤</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: ${myCustomProfitColor}; margin-top: 0.25rem;">
+                        ¥${myProfitRMB.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ $${myProfitUSD.toFixed(2)}</span>
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">平台扣款 ¥${myCommissionRMB.toFixed(2)} | 實拿淨收 ¥${myNetRevenueRMB.toFixed(2)}</div>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">刊登折扣: ${totalDiscount}% (${Math.round(platformFeeRate)}+${Math.round(discount)}%)</div>
-            </div>
-        `;
+            `;
+        } else {
+            // ==================== MODE 2: VIEW BY DESIRED PROFIT MARGIN ====================
+            let saleUSD = (totalCostRMB * (1 + targetMargin)) / (exchRate * netPlatformFactor);
+            let retailUSD = saleUSD / netDiscountFactor;
+
+            // Check Exclude Shipping toggle
+            if (excludeShippingFee) {
+                const shipUSD = shippingRMB / exchRate;
+                saleUSD = Math.max(0.01, saleUSD - shipUSD);
+                retailUSD = Math.max(0.01, retailUSD - shipUSD);
+            }
+
+            const saleRMB = saleUSD * exchRate;
+            const retailRMB = retailUSD * exchRate;
+
+            html = `
+                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準運費</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
+                </div>
+                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含平台手續)</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${displayedTotalCostRMB.toFixed(2)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
+                </div>
+                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
+                        建議特價 (買家實付)
+                        ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                    </div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-green); margin-top: 0.25rem;">
+                        $${saleUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${saleRMB.toFixed(2)}</span>
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">利潤目標: ${targetMargPercentage}% | 平台: ${platformFeeRate}%</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
+                        建議零售價 (刊登價格)
+                        ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                    </div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-pink); margin-top: 0.25rem;">
+                        $${retailUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${retailRMB.toFixed(2)}</span>
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">刊登折扣: ${totalDiscount}% (${Math.round(platformFeeRate)}+${Math.round(discount)}%)</div>
+                </div>
+            `;
+        }
 
         // If competitor price entered, calculate competitor profit and your pricing comparison
         if (!isNaN(competitorUSD) && competitorUSD > 0) {
@@ -1896,9 +1982,15 @@
             const isCompPositive = competitorProfitRMB >= 0;
             const compProfitColor = isCompPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
 
-            // 2. Your pricing calculations
-            const yourFeeRMB = saleRMB * (platformFeeRate / 100);
-            const yourNetRevenueRMB = saleRMB - yourFeeRMB;
+            // 2. Your pricing calculations (recommended by target margin)
+            let saleUSD_rec = (totalCostRMB * (1 + targetMargin)) / (exchRate * netPlatformFactor);
+            if (excludeShippingFee) {
+                const shipUSD = shippingRMB / exchRate;
+                saleUSD_rec = Math.max(0.01, saleUSD_rec - shipUSD);
+            }
+            const saleRMB_rec = saleUSD_rec * exchRate;
+            const yourFeeRMB = saleRMB_rec * (platformFeeRate / 100);
+            const yourNetRevenueRMB = saleRMB_rec - yourFeeRMB;
             const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
             const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
             const isYourPositive = yourProfitRMB >= 0;
@@ -1918,45 +2010,16 @@
                             <div>對手實際利潤率: <strong style="color: ${compProfitColor};">${competitorProfitRate.toFixed(2)}%</strong></div>
                         </div>
                     </div>
-                    <!-- Your Row -->
+                    <!-- Your Row (always show target margin comparison for additional context) -->
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(16, 185, 129, 0.04); padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.15);">
                         <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-green); display: flex; align-items: center; gap: 0.25rem;">
-                            🛡️ 您的建議定價對比:
+                            🛡️ 您的建議定價對比 (目標 ${targetMargPercentage}%):
                         </div>
                         <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
-                            <div>您的售價: <strong style="color: #fff;">$${saleUSD.toFixed(2)} (¥${saleRMB.toFixed(2)})</strong></div>
-                            <div>您的佣金: <strong style="color: var(--text-muted);">¥${yourFeeRMB.toFixed(2)}</strong></div>
-                            <div>您的淨利潤: <strong style="color: ${yourProfitColor};">${isYourPositive ? '¥' : '-¥'}${Math.abs(yourProfitRMB).toFixed(2)}</strong></div>
-                            <div>您的實際利潤率: <strong style="color: ${yourProfitColor};">${yourProfitRate.toFixed(2)}%</strong></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // If custom selling price entered, calculate the profit margin
-        if (!isNaN(mySellingPriceRMB) && mySellingPriceRMB > 0) {
-            const myGrossPriceRMB = excludeShippingFee ? (mySellingPriceRMB + shippingRMB) : mySellingPriceRMB;
-            const myCommissionRMB = myGrossPriceRMB * (platformFeeRate / 100);
-            const myNetRevenueRMB = myGrossPriceRMB - myCommissionRMB;
-            const myProfitRMB = myNetRevenueRMB - totalCostRMB;
-            const myProfitRate = (myProfitRMB / totalCostRMB) * 100;
-            const isMyCustomPositive = myProfitRMB >= 0;
-            const myCustomProfitColor = isMyCustomPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
-            const mySellingPriceUSD = mySellingPriceRMB / exchRate;
-
-            html += `
-                <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
-                    <!-- Custom Price Row -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(6, 182, 212, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.25);">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.25rem;">
-                            ✍️ 您自訂的售價利潤分析:
-                        </div>
-                        <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
-                            <div>自訂售價: <strong style="color: #fff;">¥${mySellingPriceRMB.toFixed(2)} ($${mySellingPriceUSD.toFixed(2)})</strong></div>
-                            <div>平台佣金: <strong style="color: var(--text-muted);">¥${myCommissionRMB.toFixed(2)}</strong></div>
-                            <div>預估淨利潤: <strong style="color: ${myCustomProfitColor};">${isMyCustomPositive ? '¥' : '-¥'}${Math.abs(myProfitRMB).toFixed(2)}</strong></div>
-                            <div>實際利潤比率: <strong style="color: ${myCustomProfitColor}; font-size: 0.95rem; font-weight: 800;">${myProfitRate.toFixed(2)}%</strong></div>
+                            <div>您的建議價: <strong style="color: #fff;">$${saleUSD_rec.toFixed(2)} (¥${saleRMB_rec.toFixed(2)})</strong></div>
+                            <div>建議價佣金: <strong style="color: var(--text-muted);">¥${yourFeeRMB.toFixed(2)}</strong></div>
+                            <div>建議價淨利潤: <strong style="color: ${yourProfitColor};">${isYourPositive ? '¥' : '-¥'}${Math.abs(yourProfitRMB).toFixed(2)}</strong></div>
+                            <div>建議價實際利潤率: <strong style="color: ${yourProfitColor};">${yourProfitRate.toFixed(2)}%</strong></div>
                         </div>
                     </div>
                 </div>
