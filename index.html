@@ -2704,4 +2704,28 @@
                 const prodBuf = await prodResponse.arrayBuffer();
                 prodLoaded = parseProductsData(prodBuf);
             } else {
-                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodR
+                console.warn('無法自動載入 速賣通價格計算工具.xlsx, status:', prodResponse.status);
+            }
+        } catch (err) {
+            console.warn('自動載入 速賣通價格計算工具.xlsx 被 CORS 攔截或檔案不存在:', err);
+        }
+
+        // Restore titles if loading failed so user knows they need to drag/drop
+        if (!shipLoaded) {
+            shipTitle.innerText = originalShipTitle;
+        }
+        if (!prodLoaded) {
+            prodTitle.innerText = originalProdTitle;
+        }
+
+        // Show CORS alert if loaded locally (via file://) and auto-load failed
+        if (window.location.protocol === 'file:') {
+            if (!shipLoaded || !prodLoaded) {
+                const corsAlert = document.getElementById('corsAlert');
+                if (corsAlert) corsAlert.style.display = 'block';
+            }
+        }
+    }
+</script>
+</body>
+</html>
