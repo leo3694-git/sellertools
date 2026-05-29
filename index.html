@@ -927,9 +927,9 @@
             <!-- 9. 商品是否包郵 -->
             <div class="input-group" style="flex: 1.5 1 180px; min-width: 140px;">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">定價是否包郵</label>
-                <select id="manualSellingPriceType" class="input-control" onchange="handleManualPriceTypeChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem; background: var(--input-bg); border: 1px solid var(--glass-border); color: #fff; border-radius: 8px; cursor: pointer; height: 38px; outline: none;">
-                    <option value="yes" selected>包郵 (售價已含運)</option>
-                    <option value="no">不包郵 (售價不含運)</option>
+                <select id="manualSellingPriceType" class="input-control" onchange="handleManualPriceTypeChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem; background: #ffffff !important; color: #000000 !important; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; cursor: pointer; height: 38px; font-weight: 600; outline: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    <option value="yes" selected style="background: #ffffff !important; color: #000000 !important;">包郵 (售價已含運)</option>
+                    <option value="no" style="background: #ffffff !important; color: #000000 !important;">不包郵 (售價不含運)</option>
                 </select>
             </div>
         </div>
@@ -1940,25 +1940,6 @@
                     </div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">平台扣款 ¥${myCommissionRMB.toFixed(2)} | 實拿淨收 ¥${myNetRevenueRMB.toFixed(2)}</div>
                 </div>
-                
-                <!-- 🎁 包郵 vs 📦 不包郵 售價即時計算對比區 (高度視覺化) -->
-                <div style="grid-column: 1/-1; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 1rem; margin-top: 0.25rem;">
-                    <div style="text-align: center;">
-                        <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">🎁 若做為「包郵」商品販售，折後售價應設為：</span>
-                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-green); margin-top: 0.15rem;">
-                            ¥${baoYouPriceRMB.toFixed(2)} <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ $${baoYouPriceUSD.toFixed(2)}</span>
-                        </div>
-                        <span style="font-size: 0.65rem; color: var(--text-muted);">（買家實付總價，運費已併入售價內）</span>
-                    </div>
-                    <div style="font-size: 1.8rem; color: var(--glass-border); font-weight: 300; user-select: none;">|</div>
-                    <div style="text-align: center;">
-                        <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">📦 若做為「不包郵」商品販售，折後售價應設為：</span>
-                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-cyan); margin-top: 0.15rem;">
-                            ¥${buBaoYouPriceRMB.toFixed(2)} <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ $${buBaoYouPriceUSD.toFixed(2)}</span>
-                        </div>
-                        <span style="font-size: 0.65rem; color: var(--text-muted);">（買家需另外自付無憂標準運費 ¥${shippingRMB.toFixed(2)}）</span>
-                    </div>
-                </div>
             `;
 
             // Append warning / profit banner immediately at the bottom
@@ -2032,9 +2013,76 @@
             `;
         }
 
-        // If competitor price entered, calculate competitor profit and your pricing comparison
+        // ==================== UNIFIED PRICING & COMPETITOR COMPARISON SECTION ====================
+        let comparisonHtml = `
+            <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
+        `;
+
+        // 1. 🛡️ 系統建議定價 (Always show)
+        const grossSaleRMB_rec = excludeShippingFee ? (saleRMB + shippingRMB) : saleRMB;
+        const yourFeeRMB_rec = grossSaleRMB_rec * (platformFeeRate / 100);
+        const yourNetRevenueRMB_rec = grossSaleRMB_rec - yourFeeRMB_rec;
+        const yourProfitRMB_rec = yourNetRevenueRMB_rec - totalCostRMB;
+        const yourProfitRate_rec = (yourProfitRMB_rec / totalCostRMB) * 100;
+        const isYourPositive_rec = yourProfitRMB_rec >= 0;
+        const yourProfitColor_rec = isYourPositive_rec ? 'var(--accent-green)' : 'var(--accent-pink)';
+
+        comparisonHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(16, 185, 129, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.15);">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-green); display: flex; align-items: center; gap: 0.25rem;">
+                    🛡️ 系統建議定價 (目標實際利潤 ${targetMargPercentage}%):
+                </div>
+                <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
+                    <div>建議折後售價: <strong style="color: #fff;">¥${saleRMB.toFixed(2)} ($${saleUSD.toFixed(2)})</strong></div>
+                    <div>建議打折前原價: <strong style="color: var(--text-muted);">¥${retailRMB.toFixed(2)} ($${retailUSD.toFixed(2)})</strong></div>
+                    <div>建議利潤: <strong style="color: ${yourProfitColor_rec};">${isYourPositive_rec ? '¥' : '-¥'}${Math.abs(yourProfitRMB_rec).toFixed(2)} (${yourProfitRate_rec.toFixed(2)}%)</strong></div>
+                </div>
+            </div>
+        `;
+
+        // 2. ✍️ 您自訂的售價換算 (Only in 'price' mode)
+        if (manualCalcMode === 'price') {
+            const myPriceRMB_val = isNaN(mySellingPriceRMB) ? 120 : mySellingPriceRMB;
+            const isBaoYou = (document.getElementById('manualSellingPriceType').value === 'yes');
+            
+            let baoYouRMB = 0;
+            let buBaoYouRMB = 0;
+            let grossRMB = 0;
+
+            if (isBaoYou) {
+                baoYouRMB = myPriceRMB_val;
+                buBaoYouRMB = Math.max(0, myPriceRMB_val - shippingRMB);
+                grossRMB = myPriceRMB_val;
+            } else {
+                buBaoYouRMB = myPriceRMB_val;
+                baoYouRMB = myPriceRMB_val + shippingRMB;
+                grossRMB = myPriceRMB_val + shippingRMB;
+            }
+
+            const commRMB = grossRMB * (platformFeeRate / 100);
+            const netRevRMB = grossRMB - commRMB;
+            const profitRMB = netRevRMB - totalCostRMB;
+            const profitRate = (profitRMB / totalCostRMB) * 100;
+            const isCustomPositive = profitRMB >= 0;
+            const customProfitColor = isCustomPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
+
+            const labelPrefix = isBaoYou ? '[包郵]' : '[不包郵]';
+            comparisonHtml += `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(6, 182, 212, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.15);">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.25rem;">
+                        ✍️ 您自訂的售價換算:
+                    </div>
+                    <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
+                        <div>${labelPrefix} 輸入價格: <strong style="color: #fff;">¥${myPriceRMB_val.toFixed(2)} ($${(myPriceRMB_val/exchRate).toFixed(2)})</strong></div>
+                        <div>${labelPrefix} 實際價格: <strong style="color: #34d399;">¥${grossRMB.toFixed(2)} ($${(grossRMB/exchRate).toFixed(2)})</strong></div>
+                        <div>自訂實際利潤: <strong style="color: ${customProfitColor};">${isCustomPositive ? '¥' : '-¥'}${Math.abs(profitRMB).toFixed(2)} (${profitRate.toFixed(2)}%)</strong></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. ⚔️ 競爭對手定價分析 (If competitor price is entered)
         if (!isNaN(competitorUSD) && competitorUSD > 0) {
-            // 1. Competitor reverse calculations
             const competitorRMB = competitorUSD * exchRate;
             const competitorFeeRMB = competitorRMB * (platformFeeRate / 100);
             const competitorNetRevenueRMB = competitorRMB - competitorFeeRMB;
@@ -2043,49 +2091,25 @@
             const isCompPositive = competitorProfitRMB >= 0;
             const compProfitColor = isCompPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
 
-            // 2. Your pricing calculations (recommended by target margin)
-            let saleUSD_rec = (totalCostRMB * (1 + targetMargin)) / (exchRate * netPlatformFactor);
-            if (excludeShippingFee) {
-                const shipUSD = shippingRMB / exchRate;
-                saleUSD_rec = Math.max(0.01, saleUSD_rec - shipUSD);
-            }
-            const saleRMB_rec = saleUSD_rec * exchRate;
-            const yourFeeRMB = saleRMB_rec * (platformFeeRate / 100);
-            const yourNetRevenueRMB = saleRMB_rec - yourFeeRMB;
-            const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
-            const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
-            const isYourPositive = yourProfitRMB >= 0;
-            const yourProfitColor = isYourPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
-
-            html += `
-                <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
-                    <!-- Competitor Row -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(236, 72, 153, 0.04); padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid rgba(236, 72, 153, 0.15);">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-pink); display: flex; align-items: center; gap: 0.25rem;">
-                            ⚔️ 競爭對手定價分析:
-                        </div>
-                        <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
-                            <div>對手售價: <strong style="color: #fff;">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
-                            <div>對手佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
-                            <div>對手淨利潤: <strong style="color: ${compProfitColor};">${isCompPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</strong></div>
-                            <div>對手實際利潤率: <strong style="color: ${compProfitColor};">${competitorProfitRate.toFixed(2)}%</strong></div>
-                        </div>
+            comparisonHtml += `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(236, 72, 153, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(236, 72, 153, 0.15);">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-pink); display: flex; align-items: center; gap: 0.25rem;">
+                        ⚔️ 競爭對手定價分析:
                     </div>
-                    <!-- Your Row (always show target margin comparison for additional context) -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(16, 185, 129, 0.04); padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.15);">
-                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-green); display: flex; align-items: center; gap: 0.25rem;">
-                            🛡️ 您的建議定價對比 (目標 ${targetMargPercentage}%):
-                        </div>
-                        <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
-                            <div>您的建議價: <strong style="color: #fff;">$${saleUSD_rec.toFixed(2)} (¥${saleRMB_rec.toFixed(2)})</strong></div>
-                            <div>建議價佣金: <strong style="color: var(--text-muted);">¥${yourFeeRMB.toFixed(2)}</strong></div>
-                            <div>建議價淨利潤: <strong style="color: ${yourProfitColor};">${isYourPositive ? '¥' : '-¥'}${Math.abs(yourProfitRMB).toFixed(2)}</strong></div>
-                            <div>建議價實際利潤率: <strong style="color: ${yourProfitColor};">${yourProfitRate.toFixed(2)}%</strong></div>
-                        </div>
+                    <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
+                        <div>對手折後售價: <strong style="color: #fff;">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
+                        <div>對手平台佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
+                        <div>對手淨利潤: <strong style="color: ${compProfitColor};">${isCompPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)} (${competitorProfitRate.toFixed(2)}%)</strong></div>
                     </div>
                 </div>
             `;
         }
+
+        comparisonHtml += `
+            </div>
+        `;
+
+        html += comparisonHtml;
 
         resultPanel.innerHTML = html;
     }
@@ -2880,11 +2904,4 @@
         // Show CORS alert if loaded locally (via file://) and auto-load failed
         if (window.location.protocol === 'file:') {
             if (!shipLoaded || !prodLoaded) {
-                const corsAlert = document.getElementById('corsAlert');
-                if (corsAlert) corsAlert.style.display = 'block';
-            }
-        }
-    }
-</script>
-</body>
-</html>
+          
