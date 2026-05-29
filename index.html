@@ -925,10 +925,10 @@
                 <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="選填，試算對手" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
             </div>
             <!-- 9. 將運費併入售價 -->
-            <div class="input-group" style="flex: 1.2 1 130px; min-width: 120px; justify-content: center; align-items: flex-start;">
+            <div class="input-group" style="flex: 1.5 1 200px; min-width: 160px; justify-content: center; align-items: flex-start;">
                 <label style="display: flex; align-items: center; gap: 0.45rem; cursor: pointer; user-select: none; margin-top: 1.35rem; white-space: nowrap;">
                     <input type="checkbox" id="manualMergeShippingToggle" checked onchange="toggleManualMergeShipping()" style="width: 16px; height: 16px; accent-color: var(--accent-green); cursor: pointer;">
-                    <span style="font-size: 0.82rem; font-weight: 600; color: #fff;">將運費併入售價</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #fff;">將運費併入售價 (包郵 = 建議售價 + 運費；不包郵 = 建議售價 - 運費)</span>
                 </label>
             </div>
         </div>
@@ -1155,10 +1155,10 @@
                             <th>活動折扣 (%)</th>
                             <th>無憂標準運費 (RMB)</th>
                             <th>實際利潤 (%)</th>
-                            <th>特價 (RMB)</th>
-                            <th>特價 (USD)</th>
-                            <th>零售價 (RMB)</th>
-                            <th>零售價 (USD)</th>
+                            <th>折後價格 (RMB)</th>
+                            <th>折後價格 (USD)</th>
+                            <th>打折前價格 (RMB)</th>
+                            <th>打折前價格 (USD)</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -1922,6 +1922,29 @@
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">平台扣款 ¥${myCommissionRMB.toFixed(2)} | 實拿淨收 ¥${myNetRevenueRMB.toFixed(2)}</div>
                 </div>
             `;
+
+            // Append warning / profit banner immediately at the bottom
+            if (isMyCustomPositive) {
+                html += `
+                    <div style="grid-column: 1/-1; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.2rem; line-height: 1;">💚</span>
+                            <strong style="color: var(--accent-green); font-size: 0.9rem;">試算結果：正常獲利！高於保本點。</strong>
+                        </div>
+                        <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 600;">（實際利潤率：${myProfitRate.toFixed(2)}% / 淨利潤 ¥${myProfitRMB.toFixed(2)}）</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div style="grid-column: 1/-1; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(236, 72, 153, 0.4); border-radius: 8px; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.2rem; line-height: 1;">⚠️</span>
+                            <strong style="color: var(--accent-pink); font-size: 0.95rem;">⚠️ 虧損警告：此自訂售價將導致虧損！</strong>
+                        </div>
+                        <strong style="font-size: 0.9rem; color: var(--accent-pink);">虧損金額：¥${Math.abs(myProfitRMB).toFixed(2)} ($${Math.abs(myProfitUSD).toFixed(2)})</strong>
+                    </div>
+                `;
+            }
         } else {
             // ==================== MODE 2: VIEW BY DESIRED PROFIT MARGIN ====================
             let saleUSD = (totalCostRMB * (1 + targetMargin)) / (exchRate * netPlatformFactor);
@@ -1950,7 +1973,7 @@
                 </div>
                 <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
                     <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
-                        建議特價 (買家實付)
+                        折後價格 (建議特價)
                         ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
                     </div>
                     <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-green); margin-top: 0.25rem;">
@@ -1960,7 +1983,7 @@
                 </div>
                 <div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
-                        建議零售價 (刊登價格)
+                        打折前價格 (建議零售價)
                         ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
                     </div>
                     <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-pink); margin-top: 0.25rem;">
@@ -2401,10 +2424,10 @@
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">計費重量 (KG)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">無憂標準運費</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">總成本 (RMB)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議特價 (RMB)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議特價 (USD)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議零售 (RMB)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">建議零售 (USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">折後價格 (RMB)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">折後價格 (USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">打折前價格 (RMB)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">打折前價格 (USD)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">對手售價 (USD)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">對手利潤 (RMB)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">對手利潤率 (%)</th>
@@ -2552,10 +2575,10 @@
                     <th>活動折扣 (%)</th>
                     <th>無憂標準運費 (RMB)</th>
                     <th>實際利潤 (%)</th>
-                    <th>特價 (RMB)</th>
-                    <th>特價 (USD)</th>
-                    <th>零售價 (RMB)</th>
-                    <th>零售價 (USD)</th>
+                    <th>折後價格 (RMB)</th>
+                    <th>折後價格 (USD)</th>
+                    <th>打折前價格 (RMB)</th>
+                    <th>打折前價格 (USD)</th>
                 </tr>
             `;
         } else {
@@ -2656,10 +2679,10 @@
                         newHeaders.push("計費重量(KG)");
                         newHeaders.push("活動折扣(%)");
                         newHeaders.push("無憂標準運費(RMB)");
-                        newHeaders.push("特價(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("特價(USD)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("零售價(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("零售價(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("折後價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("折後價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("打折前價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                        newHeaders.push("打折前價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
                         newHeaders.push("實際利潤率(%)");
                     } else {
                         newHeaders.push("計費重量(KG)");
