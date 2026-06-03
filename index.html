@@ -4,43 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>速賣通跨境定價與無憂標準運費計算系統</title>
-    <!-- Google Fonts: Outfit & Inter -->
+    <!-- Google Fonts: Outfit, Inter & Noto Sans TC -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- SheetJS (xlsx) via jsDelivr CDN -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --glass-bg: rgba(17, 25, 40, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --primary: #8b5cf6;
-            --primary-hover: #7c3aed;
-            --primary-glow: rgba(139, 92, 246, 0.4);
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --accent-pink: #ec4899;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --table-header-bg: #111827;
-            --table-row-hover: rgba(139, 92, 246, 0.08);
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --card-radius: 16px;
-            --transition-speed: 0.25s;
+            --bg-color: #f7f5f0;
+            --glass-bg: #ffffff;
+            --glass-border: #e3dfd5;
+            --primary: #2b4c7e;
+            --primary-hover: #1b3052;
+            --primary-glow: rgba(43, 76, 126, 0.05);
+            --accent-cyan: #3c708a;
+            --accent-green: #4a7055;
+            --accent-pink: #c94a47;
+            --text-main: #2c2c2c;
+            --text-muted: #6e6a5f;
+            --table-header-bg: #eae6db;
+            --table-row-hover: #f0ede6;
+            --input-bg: #ffffff;
+            --input-border: #dedad2;
+            --card-radius: 8px;
+            --transition-speed: 0.2s;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
         body {
-            background: radial-gradient(circle at top left, #17122a, #0b0f19 60%, #07090d);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--glass-border) 1px, transparent 1px);
+            background-size: 24px 24px;
             color: var(--text-main);
             min-height: 100vh;
             padding: 1.5rem 1rem;
@@ -60,15 +63,12 @@
         }
 
         header h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.4rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #a78bfa, #06b6d4, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
             letter-spacing: -0.5px;
             margin-bottom: 0.4rem;
-            text-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
         }
 
         header p {
@@ -77,21 +77,32 @@
             font-weight: 400;
         }
 
-        /* Glassmorphic Cards */
+        /* Minimalist Zen Cards */
         .glass-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border-radius: var(--card-radius);
-            padding: 1.25rem;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(43, 76, 126, 0.04);
             transition: transform var(--transition-speed), box-shadow var(--transition-speed);
         }
 
         .glass-card:hover {
-            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.1);
+            box-shadow: 0 6px 20px rgba(43, 76, 126, 0.08);
+        }
+
+        .theme-card-coral {
+            border: 1px solid rgba(201, 74, 71, 0.2) !important;
+            background: rgba(201, 74, 71, 0.01) !important;
+        }
+        .theme-card-green {
+            border: 1px solid rgba(74, 112, 85, 0.2) !important;
+            background: rgba(74, 112, 85, 0.01) !important;
+        }
+        .theme-card-primary {
+            border: 1px solid rgba(43, 76, 126, 0.2) !important;
+            background: rgba(43, 76, 126, 0.01) !important;
         }
 
         /* Custom Multi-Select Dropdown with Search */
@@ -101,30 +112,30 @@
         }
 
         .dropdown-trigger {
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            font-weight: 600;
+            background: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--input-border) !important;
+            border-radius: 6px;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.88rem;
+            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
             transition: all var(--transition-speed);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            height: 38px;
         }
 
         .dropdown-trigger:hover {
-            background: #f3f4f6 !important;
-            border-color: var(--primary);
+            background: #ffffff !important;
+            border-color: var(--primary) !important;
         }
 
         .dropdown-trigger svg {
-            width: 1.2rem;
-            height: 1.2rem;
-            stroke: #000000;
+            width: 1.1rem;
+            height: 1.1rem;
+            stroke: var(--text-main);
             transition: transform var(--transition-speed);
         }
 
@@ -137,17 +148,15 @@
             top: calc(100% + 6px);
             left: 0;
             right: 0;
-            background: rgba(15, 23, 42, 0.96);
+            background: #ffffff;
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 0.75rem;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 0.6rem;
+            box-shadow: 0 8px 24px rgba(40, 35, 30, 0.12);
             z-index: 100;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .dropdown-search-container {
@@ -156,36 +165,36 @@
 
         .dropdown-search-container input {
             width: 100%;
-            background: rgba(255,255,255,0.06);
+            background: #faf8f5;
             border: 1px solid var(--glass-border);
             border-radius: 6px;
             padding: 0.5rem 0.75rem;
-            color: #fff;
+            color: var(--text-main);
             font-size: 0.85rem;
             outline: none;
         }
 
         .dropdown-search-container input:focus {
             border-color: var(--primary);
-            background: rgba(255,255,255,0.1);
+            background: #ffffff;
         }
 
         .dropdown-actions {
             display: flex;
             gap: 0.35rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid var(--glass-border);
             padding-bottom: 0.4rem;
         }
 
         .dropdown-action-btn {
             flex: 1;
-            background: rgba(255,255,255,0.06);
+            background: #faf8f5;
             border: 1px solid var(--glass-border);
             color: var(--text-main);
-            padding: 0.25rem;
+            padding: 0.35rem;
             border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all var(--transition-speed);
         }
@@ -193,6 +202,7 @@
         .dropdown-action-btn:hover {
             background: var(--primary);
             border-color: var(--primary);
+            color: #ffffff;
         }
 
         .dropdown-items {
@@ -208,7 +218,7 @@
             width: 5px;
         }
         .dropdown-items::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.15);
+            background: rgba(43, 76, 126, 0.15);
             border-radius: 3px;
         }
 
@@ -217,24 +227,23 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.35rem 0.5rem;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             transition: background var(--transition-speed);
             user-select: none;
         }
 
         .dropdown-item:hover {
-            background: rgba(255,255,255,0.06);
+            background: #faf8f5;
         }
 
         .dropdown-item.active-primary {
-            background: rgba(139, 92, 246, 0.18);
+            background: rgba(43, 76, 126, 0.08);
             border-left: 3px solid var(--primary);
         }
 
         .dropdown-item input[type="checkbox"] {
             cursor: pointer;
-            accent-color: var(--primary);
             width: 14px;
             height: 14px;
         }
@@ -245,18 +254,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #d1d5db;
+            color: var(--text-main);
         }
 
         .dropdown-item.active-primary .dropdown-item-label {
-            color: #fff;
+            color: var(--primary);
             font-weight: 600;
         }
 
         .primary-badge {
             font-size: 0.65rem;
             background: var(--primary);
-            color: #fff;
+            color: #ffffff;
             padding: 1px 4px;
             border-radius: 4px;
             font-weight: 700;
@@ -277,12 +286,12 @@
         }
 
         .drop-zone {
-            border: 2px dashed rgba(139, 92, 246, 0.4);
+            border: 2px dashed rgba(43, 76, 126, 0.25);
             border-radius: var(--card-radius);
             padding: 1.75rem 1rem;
             text-align: center;
             cursor: pointer;
-            background: rgba(17, 25, 40, 0.35);
+            background: #ffffff;
             transition: all var(--transition-speed);
             position: relative;
             overflow: hidden;
@@ -291,18 +300,19 @@
             align-items: center;
             justify-content: center;
             min-height: 140px;
+            box-shadow: 0 2px 8px rgba(40, 35, 30, 0.03);
         }
 
         .drop-zone:hover, .drop-zone.dragover {
-            border-color: var(--accent-cyan);
-            background: rgba(6, 182, 212, 0.08);
+            border-color: var(--primary);
+            background: #faf8f5;
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
+            box-shadow: 0 6px 15px rgba(43, 76, 126, 0.08);
         }
 
         .drop-zone.success {
             border-color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.08);
+            background: rgba(74, 112, 85, 0.05);
         }
 
         .drop-zone svg {
@@ -315,7 +325,7 @@
 
         .drop-zone:hover svg {
             transform: scale(1.1);
-            stroke: var(--accent-cyan);
+            stroke: var(--primary-hover);
         }
 
         .drop-zone.success svg {
@@ -358,17 +368,16 @@
             font-size: 0.78rem;
             font-weight: 600;
             color: var(--text-muted);
-            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .input-control {
             background: var(--input-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
             color: var(--text-main);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             outline: none;
             transition: all var(--transition-speed);
@@ -377,16 +386,16 @@
 
         .input-control:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 10px var(--primary-glow);
-            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(43, 76, 126, 0.1);
+            background: #ffffff;
         }
 
         /* Toggle Button Group */
         .toggle-group {
             display: flex;
-            background: var(--input-bg);
+            background: #eae6db;
             border: 1px solid var(--glass-border);
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 2px;
             width: 100%;
             height: 38px;
@@ -397,17 +406,18 @@
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 500;
             font-size: 0.85rem;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 4px;
             transition: all var(--transition-speed);
         }
 
         .toggle-btn.active {
-            background: var(--primary);
-            color: var(--text-main);
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            font-weight: 600;
         }
 
         /* Tabs Styling */
@@ -432,18 +442,18 @@
             height: 4px;
         }
         .tabs::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(43, 76, 126, 0.15);
             border-radius: 2px;
         }
 
         .tab-btn {
-            background: rgba(255, 255, 255, 0.03);
+            background: #eae6db;
             border: 1px solid var(--glass-border);
-            padding: 0.5rem 1rem;
-            border-radius: 30px;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
             color: var(--text-muted);
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
             transition: all var(--transition-speed);
@@ -451,15 +461,15 @@
 
         .tab-btn:hover {
             color: var(--text-main);
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.06);
+            background: #f0ede6;
         }
 
         .tab-btn.active {
             background: var(--primary);
-            color: var(--text-main);
+            color: #ffffff;
             border-color: var(--primary);
-            box-shadow: 0 0 12px var(--primary-glow);
+            box-shadow: 0 2px 6px rgba(43, 76, 126, 0.2);
+            font-weight: 600;
         }
 
         /* Bulk Action & Search Panel */
@@ -498,26 +508,26 @@
         /* Buttons */
         .btn {
             background: var(--primary);
-            color: var(--text-main);
+            color: #ffffff;
             border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
             font-size: 0.88rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.4rem;
             transition: all var(--transition-speed);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+            box-shadow: 0 2px 6px rgba(43, 76, 126, 0.15);
             outline: none;
         }
 
         .btn:hover {
             background: var(--primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+            box-shadow: 0 4px 10px rgba(43, 76, 126, 0.25);
         }
 
         .btn:active {
@@ -526,17 +536,18 @@
 
         .btn-cyan {
             background: var(--accent-cyan);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(74, 112, 85, 0.15);
         }
 
         .btn-cyan:hover {
-            background: #0891b2;
-            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.35);
+            background: #2a523a;
+            box-shadow: 0 4px 10px rgba(74, 112, 85, 0.25);
         }
 
         .btn:disabled {
-            background: #4b5563 !important;
-            color: #9ca3af !important;
+            background: #dedad2 !important;
+            color: #a6a29a !important;
             box-shadow: none !important;
             cursor: not-allowed !important;
             transform: none !important;
@@ -548,9 +559,9 @@
             max-height: 550px; 
             overflow-y: auto;  
             overflow-x: auto;  
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid var(--glass-border);
-            background: rgba(10, 15, 26, 0.6);
+            background: #ffffff;
             margin-bottom: 1.25rem;
         }
 
@@ -559,7 +570,7 @@
             width: 6px;
         }
         .table-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(43, 76, 126, 0.15);
             border-radius: 3px;
         }
 
@@ -567,36 +578,40 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.82rem; /* Compact High-legibility font */
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 0.82rem; 
+            border: 1px solid var(--glass-border);
         }
 
         th, td {
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 0.35rem 0.5rem; /* Tight compact cell spacing */
+            border: 1px solid var(--glass-border);
+            padding: 0.4rem 0.6rem; 
             vertical-align: middle;
             white-space: nowrap;
         }
 
         th {
             background: var(--table-header-bg) !important; 
-            color: var(--text-muted);
-            font-weight: 700;
+            color: var(--text-main);
+            font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.74rem;
+            font-size: 0.78rem;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.18) !important;
+            border-bottom: 2px solid var(--glass-border) !important;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         td {
-            color: #d1d5db;
+            color: var(--text-main);
         }
 
         tr {
             transition: background var(--transition-speed);
+        }
+
+        tr:nth-child(even) {
+            background: #faf8f5;
         }
 
         tr:hover {
@@ -609,9 +624,9 @@
             font-size: 0.7rem;
             cursor: pointer;
             padding: 2px 6px;
-            background: rgba(139, 92, 246, 0.15);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: rgba(43, 76, 126, 0.08);
+            color: var(--primary);
+            border: 1px solid rgba(43, 76, 126, 0.2);
             border-radius: 4px;
             user-select: none;
             display: inline-block;
@@ -619,19 +634,19 @@
         }
         .expand-btn:hover {
             background: var(--primary);
-            color: #fff;
+            color: #ffffff;
         }
 
         /* Inline Table Inputs - Small size */
         .table-input {
             width: 65px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: #faf8f5;
+            border: 1px solid var(--glass-border);
             color: var(--text-main);
             padding: 0.18rem 0.3rem;
             border-radius: 4px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 500;
             text-align: center;
             outline: none;
             transition: all var(--transition-speed);
@@ -640,8 +655,8 @@
 
         .table-input:focus {
             border-color: var(--primary);
-            background: rgba(139, 92, 246, 0.1);
-            box-shadow: 0 0 6px var(--primary-glow);
+            background: #ffffff;
+            box-shadow: 0 0 0 2px rgba(43, 76, 126, 0.1);
         }
 
         /* Specialized Badges */
@@ -649,39 +664,51 @@
             display: inline-block;
             padding: 0.15rem 0.4rem;
             border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            font-size: 0.72rem;
+            font-weight: 500;
             text-transform: uppercase;
         }
 
         .badge-purple {
-            background: rgba(139, 92, 246, 0.15);
-            color: #c084fc;
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: rgba(43, 76, 126, 0.08);
+            color: var(--primary);
+            border: 1px solid rgba(43, 76, 126, 0.25);
         }
 
         .badge-cyan {
-            background: rgba(6, 182, 212, 0.15);
-            color: #22d3ee;
-            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(74, 112, 85, 0.08);
+            color: var(--accent-green);
+            border: 1px solid rgba(74, 112, 85, 0.25);
+        }
+
+        .badge-green {
+            background: rgba(74, 112, 85, 0.08);
+            color: var(--accent-green);
+            border: 1px solid rgba(74, 112, 85, 0.25);
+        }
+
+        .badge-coral {
+            background: rgba(201, 74, 71, 0.08);
+            color: var(--accent-pink);
+            border: 1px solid rgba(201, 74, 71, 0.25);
         }
 
         /* Calculated Highlight Styles */
         .highlight-text {
-            font-weight: 700;
-            font-size: 0.88rem;
+            font-weight: 600;
+            font-size: 0.85rem;
         }
 
         .highlight-purple {
-            color: #a78bfa;
+            color: var(--accent-pink);
         }
 
         .highlight-cyan {
-            color: #22d3ee;
+            color: #3c708a;
         }
 
         .highlight-green {
-            color: #34d399;
+            color: var(--accent-green);
         }
 
         /* Pagination Layout */
@@ -706,14 +733,14 @@
         }
 
         .page-btn {
-            background: rgba(255, 255, 255, 0.04);
+            background: #faf8f5;
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
             min-width: 30px;
             height: 30px;
             border-radius: 6px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -723,15 +750,16 @@
 
         .page-btn:hover {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: #f0ede6;
+            border-color: var(--glass-border);
         }
 
         .page-btn.active {
             background: var(--primary);
-            color: var(--text-main);
+            color: #ffffff;
             border-color: var(--primary);
-            box-shadow: 0 0 10px var(--primary-glow);
+            box-shadow: 0 2px 6px rgba(43, 76, 126, 0.2);
+            font-weight: 600;
         }
 
         .page-btn:disabled {
@@ -752,7 +780,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(11, 15, 25, 0.85);
+            background: rgba(247, 245, 240, 0.95);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -768,11 +796,11 @@
 
         /* Loading Spinner */
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(43, 76, 126, 0.1);
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            border-left-color: var(--text-main);
+            border-left-color: var(--primary);
             animation: spin 1s linear infinite;
             display: inline-block;
             vertical-align: middle;
@@ -788,19 +816,167 @@
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: rgba(16, 185, 129, 0.9);
+            background: rgba(74, 112, 85, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
             color: #fff;
             padding: 0.75rem 1.25rem;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(40, 35, 30, 0.15);
             font-weight: 600;
             z-index: 2000;
             display: none;
-            animation: slideIn 0.3s ease forwards;
         }
 
+        /* Grid for Manual Calculator Inputs */
+        .manual-calc-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            align-items: end;
+        }
+
+        @media (max-width: 1200px) {
+            .manual-calc-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .manual-calc-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .manual-calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .toggle-checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            width: 100%;
+            background: var(--input-bg);
+            cursor: pointer;
+            user-select: none;
+            transition: all var(--transition-speed);
+            gap: 0.4rem;
+        }
+
+        .toggle-checkbox-label:hover {
+            border-color: var(--accent-green);
+            background: #faf8f5;
+        }
+
+        .toggle-checkbox-label:has(input:checked) {
+            background: rgba(74, 112, 85, 0.08);
+            border-color: var(--accent-green);
+        }
+
+        /* Grid for Manual Calculator Results */
+        .manual-result-card {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .manual-result-card {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 580px) {
+            .manual-result-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Structured results layout */
+        .result-box {
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(40, 30, 20, 0.02);
+        }
+
+        .result-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+            margin-bottom: 0.4rem;
+        }
+
+        .result-value span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .result-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .val-primary { color: var(--primary) !important; }
+        .val-cyan { color: #3c708a !important; }
+        .val-green { color: var(--accent-green) !important; }
+        .val-red { color: var(--accent-pink) !important; }
+
+        .alert-banner {
+            grid-column: 1 / -1;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .alert-banner-success {
+            background: rgba(74, 112, 85, 0.08);
+            border: 1px solid rgba(74, 112, 85, 0.25);
+            color: var(--accent-green);
+        }
+
+        .alert-banner-danger {
+            background: rgba(201, 74, 71, 0.08);
+            border: 1px solid rgba(201, 74, 71, 0.25);
+            color: var(--accent-pink);
+        }
+
+        .warning-banner {
+            background: #fffdf5;
+            border: 1px solid #ebd094;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #7c5e20;
+        }
+        
         @keyframes slideIn {
             from { transform: translateY(1rem); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -834,7 +1010,7 @@
     </div>
 
     <!-- Live Currency Converter Widget -->
-    <div class="glass-card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-color: rgba(236, 72, 153, 0.25); background: rgba(236, 72, 153, 0.02);">
+    <div class="glass-card theme-card-coral">
         <h3 style="font-size: 0.9rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-pink); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; stroke: var(--accent-pink);">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -844,18 +1020,18 @@
         <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 200px;">
                 <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">美金 (USD)</span>
-                <input type="number" id="quickUSD" class="input-control" placeholder="輸入美金金額" step="0.01" style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="convertCurrency('usd')">
+                <input type="number" id="quickUSD" class="input-control" placeholder="輸入美金金額" step="0.01" oninput="convertCurrency('usd')">
             </div>
             <div style="font-size: 1.25rem; color: var(--accent-pink); font-weight: 700; user-select: none;">⇄</div>
             <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 200px;">
                 <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">人民幣 (RMB)</span>
-                <input type="number" id="quickRMB" class="input-control" placeholder="輸入人民幣金額" step="0.01" style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="convertCurrency('rmb')">
+                <input type="number" id="quickRMB" class="input-control" placeholder="輸入人民幣金額" step="0.01" oninput="convertCurrency('rmb')">
             </div>
         </div>
     </div>
 
     <!-- Single Product Manual Calculator -->
-    <div class="glass-card" style="border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.02); margin-bottom: 1.5rem; position: relative; z-index: 50;">
+    <div class="glass-card theme-card-green" style="position: relative; z-index: 50;">
         <h2 style="font-size:1.15rem; font-family:'Outfit',sans-serif; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem; color: var(--accent-green);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px; height:20px; stroke:var(--accent-green);">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -863,87 +1039,86 @@
             📊 單件商品手動快速試算區 (無須匯入 Excel 即可使用)
         </h2>
         <!-- 試算模式分頁 (售價在前，利潤率在後) -->
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.6rem;">
-            <button id="manualModePriceBtn" class="tab-btn active" onclick="setManualCalcMode('price')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.82rem; border-radius: 20px;">💰 依自訂售價換算實際利潤</button>
-            <button id="manualModeMarginBtn" class="tab-btn" onclick="setManualCalcMode('margin')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.82rem; border-radius: 20px;">📈 依目標利潤率推算建議售價</button>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.6rem;">
+            <button id="manualModePriceBtn" class="tab-btn active" onclick="setManualCalcMode('price')" style="border: none; border-radius: 20px;">💰 依自訂售價換算實際利潤</button>
+            <button id="manualModeMarginBtn" class="tab-btn" onclick="setManualCalcMode('margin')" style="border: none; border-radius: 20px;">📈 依目標利潤率推算建議售價</button>
         </div>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1rem; align-items: flex-start;">
+        <div class="manual-calc-grid">
             <!-- 1. 目的地國家 -->
-            <div class="input-group" style="position: relative; flex: 1.5 1 180px; min-width: 150px;">
+            <div class="input-group" style="position: relative;">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">試算目的地國家</label>
                 <div class="custom-dropdown" id="manualCountryDropdownContainer">
-                    <div class="dropdown-trigger" id="manualCountryDropdownTrigger" style="background: #ffffff !important; color: #000000 !important; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; height: 38px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div class="dropdown-trigger" id="manualCountryDropdownTrigger">
                         <span>選擇國家...</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 1.1rem; height: 1.1rem; stroke: #000000;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
-                    <div class="dropdown-menu" id="manualCountryDropdownMenu" style="display: none; background: rgba(15, 23, 42, 0.98); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.6rem; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: absolute; top: calc(100% + 6px); left: 0; right: 0; display: flex; flex-direction: column; gap: 0.4rem; min-width: 220px;">
+                    <div class="dropdown-menu" id="manualCountryDropdownMenu" style="display: none; min-width: 220px;">
                         <div class="dropdown-search-container">
-                            <input type="text" id="manualCountrySearch" placeholder="搜尋國家 (中文/英文)..." oninput="handleManualCountrySearch(this.value)" style="width: 100%; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 6px; padding: 0.4rem 0.6rem; color: #fff; font-size: 0.8rem; outline: none;">
+                            <input type="text" id="manualCountrySearch" placeholder="搜尋國家 (中文/英文)..." oninput="handleManualCountrySearch(this.value)">
                         </div>
-                        <div class="dropdown-items" id="manualCountryDropdownItems" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem;">
+                        <div class="dropdown-items" id="manualCountryDropdownItems">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- 2. 我的成本 (採購成本) -->
-            <div class="input-group" style="flex: 1 1 110px; min-width: 90px;">
+            <!-- 2. 採購成本 (成本) -->
+            <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">採購成本 (RMB)</label>
-                <input type="number" id="manualCost" class="input-control" value="40" step="1" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+                <input type="number" id="manualCost" class="input-control" value="40" step="1" min="0" oninput="calculateManualPrice()">
             </div>
-            <!-- 3. 自訂售價 (RMB) 換算利潤 -->
-            <div class="input-group" id="manualSellingPriceInputGroup" style="flex: 1.3 1 140px; min-width: 120px;">
-                <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">自訂售價 (RMB)</label>
-                <input type="number" id="manualSellingPriceRMB" class="input-control" value="120" placeholder="自訂售價試算利潤" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+            <!-- 3. 淨收入 / 目標利潤 (淨收入) -->
+            <div class="input-group" id="manualSellingPriceInputGroup">
+                <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">淨收入 (RMB)</label>
+                <input type="number" id="manualSellingPriceRMB" class="input-control" value="120" placeholder="自訂售價試算利潤" step="0.01" min="0" oninput="calculateManualPrice()">
             </div>
-            <!-- 4. 我想要的利潤 (目標利潤率) -->
-            <div class="input-group" id="manualMarginInputGroup" style="display: none; flex: 1.3 1 140px; min-width: 120px;">
+            <div class="input-group" id="manualMarginInputGroup" style="display: none;">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">目標利潤 (%)</label>
-                <input type="number" id="manualMargin" class="input-control" value="20" step="1" min="-99" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+                <input type="number" id="manualMargin" class="input-control" value="20" step="1" min="-99" max="99" oninput="calculateManualPrice()">
             </div>
-            <!-- 5. 平台手續費 (%) -->
-            <div class="input-group" style="flex: 0.7 1 80px; min-width: 70px;">
-                <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">平台手續 (%)</label>
-                <input type="number" id="manualPlatformFee" class="input-control" value="10" step="0.1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
-            </div>
-            <!-- 6. 重量 -->
-            <div class="input-group" style="flex: 1 1 110px; min-width: 90px;">
+            <!-- 4. 商品重量 (重量) -->
+            <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">商品重量 (KG)</label>
-                <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+                <input type="number" id="manualWeight" class="input-control" value="0.5" step="0.01" min="0.001" oninput="calculateManualPrice()">
             </div>
-            <!-- 7. 活動折扣 (%) -->
-            <div class="input-group" style="flex: 0.7 1 80px; min-width: 70px;">
+            <!-- 5. 平台手續 (%) (手續) -->
+            <div class="input-group">
+                <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">平台手續 (%)</label>
+                <input type="number" id="manualPlatformFee" class="input-control" value="10" step="0.1" min="0" max="99" oninput="calculateManualPrice()">
+            </div>
+            <!-- 6. 活動折扣 (%) (折扣) -->
+            <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">活動折扣 (%)</label>
-                <input type="number" id="manualDiscount" class="input-control" value="30" step="1" min="0" max="99" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+                <input type="number" id="manualDiscount" class="input-control" value="30" step="1" min="0" max="99" oninput="calculateManualPrice()">
             </div>
-            <!-- 8. 對手價格 (含平台手續) -->
-            <div class="input-group" style="flex: 1.2 1 130px; min-width: 110px;">
+            <!-- 7. 對手售價 (對手) -->
+            <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">對手售價 (USD)</label>
-                <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="選填，試算對手" step="0.01" min="0" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" oninput="calculateManualPrice()">
+                <input type="number" id="manualCompetitorPrice" class="input-control" placeholder="選填，試算對手" step="0.01" min="0" oninput="calculateManualPrice()">
             </div>
-            <!-- 9. 商品是否包郵 -->
-            <div class="input-group" style="flex: 1.5 1 180px; min-width: 140px;">
+            <!-- 8. 是否包郵 (包郵) -->
+            <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">定價是否包郵</label>
-                <select id="manualSellingPriceType" class="input-control" onchange="handleManualPriceTypeChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem; background: #ffffff !important; color: #000000 !important; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; cursor: pointer; height: 38px; font-weight: 600; outline: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                    <option value="yes" selected style="background: #ffffff !important; color: #000000 !important;">包郵 (售價已含運)</option>
-                    <option value="no" style="background: #ffffff !important; color: #000000 !important;">不包郵 (售價不含運)</option>
-                </select>
+                <label class="toggle-checkbox-label">
+                    <input type="checkbox" id="manualSellingPriceType" onchange="handleManualPriceTypeChange()" style="width: 15px; height: 15px; accent-color: var(--accent-green); cursor: pointer;" checked>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">包郵 (含運)</span>
+                </label>
             </div>
         </div>
         
         <!-- Manual Results Panel -->
-        <div id="manualResultPanel" style="background: rgba(0,0,0,0.35); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div id="manualResultPanel" class="manual-result-card">
             <!-- Renders dynamically -->
         </div>
     </div>
 
     <!-- Pricing Formula Display Card -->
-    <div class="glass-card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-color: rgba(139, 92, 246, 0.25); background: rgba(139, 92, 246, 0.03);">
-        <h3 style="font-size: 0.9rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-cyan); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; stroke: var(--accent-cyan);">
+    <div class="glass-card theme-card-primary">
+        <h3 style="font-size: 0.9rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; stroke: var(--primary);">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
             速賣通官方標準定價公式說明
@@ -951,16 +1126,16 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; font-size: 0.82rem; line-height: 1.5;">
             <div style="border-left: 3px solid var(--accent-green); padding-left: 0.75rem;">
                 <strong style="color: var(--accent-green);">1. 買家實付【特價 (USD)】</strong>：涵蓋全部成本，保證您的目標實際利潤率
-                <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">
+                <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-top: 0.2rem;">
                     特價 (USD) = 總成本 × (1 + 實際利潤%) ÷ 匯率
                 </div>
                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
                     * 總成本 (含平台手續) = (進貨價 + 國內運費 + 無憂標準運費 + 海關報關費) ÷ (1 - 平台費率%)
                 </div>
             </div>
-            <div style="border-left: 3px solid var(--primary); padding-left: 0.75rem;">
-                <strong style="color: #c084fc;">2. 促銷刊登【零售價 (USD)】</strong>：逆推刊登零售價，確保折後剛好等於特價
-                <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">
+            <div style="border-left: 3px solid var(--accent-pink); padding-left: 0.75rem;">
+                <strong style="color: var(--accent-pink);">2. 促銷刊登【零售價 (USD)】</strong>：逆推刊登零售價，確保折後剛好等於特價
+                <div style="font-family: 'Outfit', monospace; font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-top: 0.2rem;">
                     零售價 (USD) = 特價 (USD) ÷ [ 1 - (活動折扣% + 額外折扣%) / 100 ]
                 </div>
             </div>
@@ -1090,23 +1265,23 @@
                 <div class="input-group" style="justify-content: center; align-items: flex-start; height: 100%;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; margin-top: 1.35rem;">
                         <input type="checkbox" id="excludeShippingToggle" onchange="toggleExcludeShipping()" style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
-                        <span style="font-size: 0.88rem; font-weight: 600; color: #fff;">最終售價扣除運費 (不含運報價)</span>
+                        <span style="font-size: 0.88rem; font-weight: 600; color: var(--text-main);">最終售價扣除運費 (不含運報價)</span>
                     </label>
                 </div>
             </div>
         </div>
 
         <!-- View Mode Toggle -->
-        <div class="glass-card" style="position: relative; z-index: 20; padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.02);">
+        <div class="glass-card theme-card-primary" style="position: relative; z-index: 20; padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 0.4rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px; stroke:var(--accent-cyan);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px; height:18px; stroke:var(--primary);">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span style="font-size: 0.95rem; font-weight: 700; font-family:'Outfit',sans-serif; color: #fff; letter-spacing: 0.5px;">系統功能模式</span>
+                <span style="font-size: 0.95rem; font-weight: 700; font-family:'Outfit',sans-serif; color: var(--primary); letter-spacing: 0.5px;">系統功能模式</span>
             </div>
-            <div style="display: flex; gap: 0.4rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 3px; border-radius: 30px; width: fit-content;">
-                <button id="viewPricingBtn" class="tab-btn active" onclick="setViewMode('pricing')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.8rem; border-radius: 20px;">📊 跨境定價與批量試算</button>
-                <button id="viewCompetitorBtn" class="tab-btn" onclick="setViewMode('competitor')" style="border: none; padding: 0.4rem 1.25rem; font-size: 0.8rem; border-radius: 20px;">⚔️ 競爭對手利潤分析</button>
+            <div style="display: flex; gap: 0.4rem; background: #eae6db; border: 1px solid var(--glass-border); padding: 3px; border-radius: 30px; width: fit-content;">
+                <button id="viewPricingBtn" class="tab-btn active" onclick="setViewMode('pricing')" style="border: none; border-radius: 20px;">📊 跨境定價與批量試算</button>
+                <button id="viewCompetitorBtn" class="tab-btn" onclick="setViewMode('competitor')" style="border: none; border-radius: 20px;">⚔️ 競爭對手利潤分析</button>
             </div>
         </div>
 
@@ -1545,8 +1720,8 @@
     }
 
     function handleManualPriceTypeChange() {
-        const typeSelect = document.getElementById('manualSellingPriceType');
-        excludeShippingFee = (typeSelect.value === 'no');
+        const typeCheckbox = document.getElementById('manualSellingPriceType');
+        excludeShippingFee = !typeCheckbox.checked;
         
         // Synchronize with bottom parameter toggle
         const bottomToggle = document.getElementById('excludeShippingToggle');
@@ -1775,10 +1950,10 @@
     function toggleExcludeShipping() {
         excludeShippingFee = document.getElementById('excludeShippingToggle').checked;
         
-        // Synchronize with top dropdown
-        const topSelect = document.getElementById('manualSellingPriceType');
-        if (topSelect) {
-            topSelect.value = excludeShippingFee ? 'no' : 'yes';
+        // Synchronize with top checkbox
+        const topCheckbox = document.getElementById('manualSellingPriceType');
+        if (topCheckbox) {
+            topCheckbox.checked = !excludeShippingFee;
         }
         
         renderTable();
@@ -1888,80 +2063,101 @@
         if (manualCalcMode === 'price') {
             // ==================== MODE 1: VIEW BY SELLING PRICE ====================
             const myPriceRMB = isNaN(mySellingPriceRMB) ? 120 : mySellingPriceRMB;
-            const isBaoYouInput = (document.getElementById('manualSellingPriceType').value === 'yes');
+            const isBaoYouInput = document.getElementById('manualSellingPriceType').checked;
             
-            let baoYouPriceRMB = 0;
-            let buBaoYouPriceRMB = 0;
+            // Calculate discounted item price (excluding shipping discount)
+            const discountedItemPriceRMB = myPriceRMB * (1 - discount / 100);
+            
+            let displayInputPriceRMB = 0;
+            let displayDiscountedPriceRMB = 0;
             let myGrossPriceRMB = 0;
+            let suggestedRetailRMB = 0;
 
             if (isBaoYouInput) {
-                baoYouPriceRMB = myPriceRMB;
-                buBaoYouPriceRMB = Math.max(0, myPriceRMB - shippingRMB);
-                myGrossPriceRMB = myPriceRMB; // platform commission is charged on the total merged transaction amount
+                // Free Shipping: Original price = custom selling price + shipping
+                displayInputPriceRMB = myPriceRMB + shippingRMB;
+                // Actual buyer payment (gross price with platform fee markup)
+                myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
+                // Price after activity discount (discount applied on the entire free shipping price)
+                displayDiscountedPriceRMB = myGrossPriceRMB;
+                // Suggested listing price (retail price before discount)
+                suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
             } else {
-                buBaoYouPriceRMB = myPriceRMB;
-                baoYouPriceRMB = myPriceRMB + shippingRMB;
-                myGrossPriceRMB = myPriceRMB + shippingRMB; // platform commission is charged on item + shipping total
+                // Non-Free Shipping: Original price = custom selling price
+                displayInputPriceRMB = myPriceRMB;
+                // Price after activity discount (discount applied on selling price)
+                displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                // Actual buyer payment (gross price with platform fee markup + shipping)
+                myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
+                // Suggested listing price (retail price before discount)
+                suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
             }
 
             const myCommissionRMB = myGrossPriceRMB * (platformFeeRate / 100);
             const myNetRevenueRMB = myGrossPriceRMB - myCommissionRMB;
             const myProfitRMB = myNetRevenueRMB - totalCostRMB;
             const myProfitRate = (myProfitRMB / totalCostRMB) * 100;
+            const actualTotalCostRMB = isBaoYouInput ? (totalCostRMB + myCommissionRMB) : (totalCostRMB - shippingRMB + myCommissionRMB);
+
+            // Programmatically sync target margin input (bidirectional linking)
+            const marginInput = document.getElementById('manualMargin');
+            if (marginInput && document.activeElement !== marginInput) {
+                marginInput.value = myProfitRate.toFixed(1);
+            }
             const isMyCustomPositive = myProfitRMB >= 0;
             const myCustomProfitColor = isMyCustomPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
-            const myPriceUSD = myPriceRMB / exchRate;
+            const displayInputPriceUSD = displayInputPriceRMB / exchRate;
+            const displayDiscountedPriceUSD = displayDiscountedPriceRMB / exchRate;
+            const discountedItemPriceUSD = discountedItemPriceRMB / exchRate;
+            const suggestedRetailUSD = suggestedRetailRMB / exchRate;
             const myProfitUSD = myProfitRMB / exchRate;
-            
-            const baoYouPriceUSD = baoYouPriceRMB / exchRate;
-            const buBaoYouPriceUSD = buBaoYouPriceRMB / exchRate;
 
             html = `
-                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準運費</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
+                <div class="result-box">
+                    <div class="result-label">物流標準運費</div>
+                    <div class="result-value val-cyan">¥${shippingRMB.toFixed(2)}</div>
+                    <div class="result-desc">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
                 </div>
-                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含平台手續)</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${displayedTotalCostRMB.toFixed(2)}</div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
+                <div class="result-box">
+                    <div class="result-label">實際交易總成本</div>
+                    <div class="result-value val-primary">¥${actualTotalCostRMB.toFixed(2)}</div>
+                    <div class="result-desc">商品 ¥${cost.toFixed(2)} ${isBaoYouInput ? `| 運費 ¥${shippingRMB.toFixed(2)}` : ''} | 佣金 ¥${myCommissionRMB.toFixed(2)}</div>
                 </div>
-                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">${isBaoYouInput ? '[包郵]' : '[不包郵]'} 輸入價格</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
-                        ¥${myPriceRMB.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ $${myPriceUSD.toFixed(2)}</span>
+                <div class="result-box">
+                    <div class="result-label">活動折扣後的價格</div>
+                    <div class="result-value val-green">
+                        ¥${displayDiscountedPriceRMB.toFixed(2)} <span>/ $${displayDiscountedPriceUSD.toFixed(2)}</span>
                     </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">平台扣款 ¥${myCommissionRMB.toFixed(2)} | 實拿淨收 ¥${myNetRevenueRMB.toFixed(2)}</div>
+                    <div class="result-desc">${isBaoYouInput ? '包含運費與平台費' : '僅包含平台服務費'}</div>
                 </div>
-                <div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">${isBaoYouInput ? '[包郵]' : '[不包郵]'} 實際價格</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-green); margin-top: 0.25rem;">
-                        ¥${myGrossPriceRMB.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ $${(myGrossPriceRMB / exchRate).toFixed(2)}</span>
+                <div class="result-box">
+                    <div class="result-label">建議設定售價 (上架原價)</div>
+                    <div class="result-value val-red">
+                        ¥${suggestedRetailRMB.toFixed(2)} <span>/ $${suggestedRetailUSD.toFixed(2)}</span>
                     </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">實際淨利潤 <strong style="color: ${myCustomProfitColor}; font-size: 0.72rem;">¥${myProfitRMB.toFixed(2)} (${myProfitRate.toFixed(2)}%)</strong></div>
+                    <div class="result-desc">後台上架原價填此</div>
                 </div>
             `;
 
             // Append warning / profit banner immediately at the bottom
             if (isMyCustomPositive) {
                 html += `
-                    <div style="grid-column: 1/-1; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
+                    <div class="alert-banner alert-banner-success">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.2rem; line-height: 1;">💚</span>
-                            <strong style="color: var(--accent-green); font-size: 0.9rem;">試算結果：正常獲利！高於保本點。</strong>
+                            <strong style="font-size: 0.9rem;">試算結果：正常獲利！高於保本點。</strong>
                         </div>
-                        <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 600;">（實際利潤率：${myProfitRate.toFixed(2)}% / 淨利潤 ¥${myProfitRMB.toFixed(2)}）</span>
+                        <span style="font-size: 0.75rem; font-weight: 600;">（實際利潤率：${myProfitRate.toFixed(2)}% / 淨利潤 ¥${myProfitRMB.toFixed(2)}）</span>
                     </div>
                 `;
             } else {
                 html += `
-                    <div style="grid-column: 1/-1; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(236, 72, 153, 0.4); border-radius: 8px; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
+                    <div class="alert-banner alert-banner-danger">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.2rem; line-height: 1;">⚠️</span>
-                            <strong style="color: var(--accent-pink); font-size: 0.95rem;">⚠️ 虧損警告：此自訂售價將導致虧損！</strong>
+                            <strong style="font-size: 0.95rem;">虧損警告：此自訂售價將導致虧損！</strong>
                         </div>
-                        <strong style="font-size: 0.9rem; color: var(--accent-pink);">虧損金額：¥${Math.abs(myProfitRMB).toFixed(2)} ($${Math.abs(myProfitUSD).toFixed(2)})</strong>
+                        <strong style="font-size: 0.9rem;">虧損金額：¥${Math.abs(myProfitRMB).toFixed(2)} ($${Math.abs(myProfitUSD).toFixed(2)})</strong>
                     </div>
                 `;
             }
@@ -1986,192 +2182,50 @@
             const isYourPositive_rec = yourProfitRMB_rec >= 0;
             const yourProfitColor_rec = isYourPositive_rec ? 'var(--accent-green)' : 'var(--accent-pink)';
 
+            // Programmatically sync custom price input (bidirectional linking)
+            const priceInput = document.getElementById('manualSellingPriceRMB');
+            if (priceInput && document.activeElement !== priceInput) {
+                // Sync with the price required to get the target saleRMB payout under Mode 1 logic
+                const syncedPriceRMB = saleRMB * netPlatformFactor - shippingRMB;
+                priceInput.value = Math.max(0, syncedPriceRMB).toFixed(2);
+            }
+
             html = `
-                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">物流標準运费</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-top: 0.25rem;">¥${shippingRMB.toFixed(2)}</div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
+                <div class="result-box">
+                    <div class="result-label">物流標準運費</div>
+                    <div class="result-value val-cyan">¥${shippingRMB.toFixed(2)}</div>
+                    <div class="result-desc">國家: ${shippingRates[selectedCountryCode] ? shippingRates[selectedCountryCode].name : primaryCountry} | ${isSpecialCargo ? '非普貨' : '普貨'}</div>
                 </div>
-                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">總成本 (含平台手續)</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">¥${displayedTotalCostRMB.toFixed(2)}</div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
+                <div class="result-box">
+                    <div class="result-label">總成本 (含平台手續)</div>
+                    <div class="result-value val-primary">¥${displayedTotalCostRMB.toFixed(2)}</div>
+                    <div class="result-desc">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
                 </div>
-                <div style="border-right: 1px solid rgba(255,255,255,0.08); padding-right: 0.5rem;">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
+                <div class="result-box">
+                    <div class="result-label" style="display: flex; align-items: center; gap: 0.25rem;">
                         折後價格 (建議特價)
-                        ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                        ${excludeShippingFee ? '<span class="badge badge-purple" style="font-size: 0.55rem; padding: 1px 3px;">扣除運費</span>' : ''}
                     </div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-green); margin-top: 0.25rem;">
-                        $${saleUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${saleRMB.toFixed(2)}</span>
+                    <div class="result-value val-green">
+                        $${saleUSD.toFixed(2)} <span>/ ¥${saleRMB.toFixed(2)}</span>
                     </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">利潤目標: ${targetMargPercentage}% | 平台: ${platformFeeRate}%</div>
+                    <div class="result-desc">利潤目標: ${targetMargPercentage}% | 平台: ${platformFeeRate}%</div>
                 </div>
-                <div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.25rem;">
+                <div class="result-box">
+                    <div class="result-label" style="display: flex; align-items: center; gap: 0.25rem;">
                         打折前價格 (建議零售價)
-                        ${excludeShippingFee ? '<span class="badge" style="font-size: 0.55rem; background: var(--primary); padding: 1px 3px;">扣除運費</span>' : ''}
+                        ${excludeShippingFee ? '<span class="badge badge-purple" style="font-size: 0.55rem; padding: 1px 3px;">扣除運費</span>' : ''}
                     </div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-pink); margin-top: 0.25rem;">
-                        $${retailUSD.toFixed(2)} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ ¥${retailRMB.toFixed(2)}</span>
+                    <div class="result-value val-red">
+                        $${retailUSD.toFixed(2)} <span>/ ¥${retailRMB.toFixed(2)}</span>
                     </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">刊登折扣: ${totalDiscount}% (${Math.round(platformFeeRate)}+${Math.round(discount)}%)</div>
+                    <div class="result-desc">刊登折扣: ${totalDiscount}% (${Math.round(platformFeeRate)}+${Math.round(discount)}%)</div>
                 </div>
             `;
         }
 
         // ==================== UNIFIED PRICING & COMPETITOR COMPARISON SECTION ====================
-        let comparisonHtml = `
-            <div style="grid-column: 1/-1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
-        `;
-
-        if (manualCalcMode === 'margin') {
-            // ==================== 1. 🛡️ 系統建議定價大卡片 (利潤率模式) ====================
-            const suggestedItemRetailUSD = retailUSD;
-            const suggestedItemRetailRMB = retailRMB;
-            const suggestedItemSaleUSD = saleUSD;
-            const suggestedItemSaleRMB = saleRMB;
-            const suggestedTotalSaleUSD = saleUSD + (excludeShippingFee ? (shippingRMB / exchRate) : 0);
-            const suggestedTotalSaleRMB = saleRMB + (excludeShippingFee ? shippingRMB : 0);
-            const suggestedShippingUSD = shippingRMB / exchRate;
-
-            comparisonHtml += `
-                <div style="background: rgba(16, 185, 129, 0.08); border: 2px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 1.2rem; margin-bottom: 0.5rem; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15); display: flex; flex-direction: column; gap: 0.8rem;">
-                    <div style="font-size: 0.95rem; font-weight: 800; color: var(--accent-green); display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid rgba(16, 185, 129, 0.2); padding-bottom: 0.4rem;">
-                        🛡️ 系統核心建議定價 (目標實際利潤 ${targetMargPercentage}%):
-                    </div>
-                    <div style="display: flex; align-items: stretch; justify-content: space-around; flex-wrap: wrap; gap: 1rem;">
-                        
-                        <!-- 建議打折前原價 (去郵費) -->
-                        <div style="text-align: center; flex: 1; min-width: 200px; padding: 0.8rem; background: rgba(236, 72, 153, 0.07); border: 1.5px solid rgba(236, 72, 153, 0.4); border-radius: 10px; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);">
-                            <span style="font-size: 0.82rem; color: #f9a8d4; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📢 ${excludeShippingFee ? '[不包郵]' : '[包郵]'} 商品刊登原價</span>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #f472b6; margin-top: 0.35rem; font-family: 'Outfit', sans-serif; text-shadow: 0 0 8px rgba(236, 72, 153, 0.25);">
-                                $${suggestedItemRetailUSD.toFixed(2)} <span style="font-size: 1.25rem; font-weight: 600; color: #f9a8d4;">/ ¥${suggestedItemRetailRMB.toFixed(2)}</span>
-                            </div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem;">（買家在頁面看見的劃線折扣前原價，不含郵資）</div>
-                        </div>
-                        
-                        <!-- 建議折後商品售價 (去郵費) -->
-                        <div style="text-align: center; flex: 1; min-width: 200px; padding: 0.8rem; background: rgba(16, 185, 129, 0.07); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 10px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);">
-                            <span style="font-size: 0.82rem; color: #6ee7b7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">✨ ${excludeShippingFee ? '[不包郵]' : '[包郵]'} 商品刊登特價</span>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #34d399; margin-top: 0.35rem; font-family: 'Outfit', sans-serif; text-shadow: 0 0 12px rgba(16, 185, 129, 0.45);">
-                                $${suggestedItemSaleUSD.toFixed(2)} <span style="font-size: 1.25rem; font-weight: 600; color: #6ee7b7;">/ ¥${suggestedItemSaleRMB.toFixed(2)}</span>
-                            </div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem;">（買家在商品頁看見的促銷特價，去郵費）</div>
-                        </div>
-
-                        <!-- 建議上架對照 (去郵商品與郵費) -->
-                        <div style="text-align: center; flex: 1; min-width: 200px; padding: 0.8rem; background: rgba(59, 130, 246, 0.07); border: 1.5px solid rgba(59, 130, 246, 0.4); border-radius: 10px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); display: flex; flex-direction: column; justify-content: space-between;">
-                            <span style="font-size: 0.82rem; color: #93c5fd; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🚚 ${excludeShippingFee ? '[不包郵]' : '[包郵]'} 上架對照 (商品與郵費)</span>
-                            <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.5rem; text-align: left; padding: 0 0.5rem; justify-content: center; flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.25rem;">
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);">去郵單品價 (RMB):</span>
-                                    <strong style="font-size: 1.1rem; color: #fff;">¥${suggestedItemSaleRMB.toFixed(2)}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.25rem;">
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);">去郵單品價 (USD):</span>
-                                    <strong style="font-size: 1.15rem; color: #60a5fa;">$${suggestedItemSaleUSD.toFixed(2)}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);">郵費換算 (USD):</span>
-                                    <strong style="font-size: 1.15rem; color: var(--accent-cyan);">$${suggestedShippingUSD.toFixed(2)}</strong>
-                                </div>
-                            </div>
-                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.4rem; text-align: center; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.25rem;">（買家實付總價：$${suggestedTotalSaleUSD.toFixed(2)} / ¥${suggestedTotalSaleRMB.toFixed(2)}）</div>
-                        </div>
-                        
-                    </div>
-                    <div style="text-align: center; font-size: 0.82rem; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                        <span>預估建議淨利潤: <strong style="color: ${yourProfitColor_rec}; font-size: 0.9rem;">${isYourPositive_rec ? '¥' : '-¥'}${Math.abs(yourProfitRMB_rec).toFixed(2)} (${yourProfitRate_rec.toFixed(2)}%)</strong></span>
-                        <span style="color: rgba(255,255,255,0.15);">|</span>
-                        <span>總計費成本 (含平台手續): <strong>¥${displayedTotalCostRMB.toFixed(2)}</strong></span>
-                    </div>
-                </div>
-            `;
-        } else {
-            // ==================== 2. ✍️ 自訂售價核心大卡片 (售價模式) ====================
-            const myPriceRMB_val = isNaN(mySellingPriceRMB) ? 120 : mySellingPriceRMB;
-            const isBaoYou = (document.getElementById('manualSellingPriceType').value === 'yes');
-            
-            let grossRMB = 0;
-            if (isBaoYou) {
-                grossRMB = myPriceRMB_val;
-            } else {
-                grossRMB = myPriceRMB_val + shippingRMB;
-            }
-
-            const commRMB = grossRMB * (platformFeeRate / 100);
-            const netRevRMB = grossRMB - commRMB;
-            const profitRMB = netRevRMB - totalCostRMB;
-            const profitRate = (profitRMB / totalCostRMB) * 100;
-            const isCustomPositive = profitRMB >= 0;
-            const customProfitColor = isCustomPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
-
-            const labelPrefix = isBaoYou ? '[包郵]' : '[不包郵]';
-
-            const itemSaleRMB = isBaoYou ? Math.max(0, myPriceRMB_val - shippingRMB) : myPriceRMB_val;
-            const itemSaleUSD = itemSaleRMB / exchRate;
-            const itemRetailRMB = itemSaleRMB / netDiscountFactor;
-            const itemRetailUSD = itemRetailRMB / exchRate;
-            
-            const shippingUSD = shippingRMB / exchRate;
-            const grossUSD = grossRMB / exchRate;
-
-            comparisonHtml += `
-                <div style="background: rgba(6, 182, 212, 0.08); border: 2px solid rgba(6, 182, 212, 0.35); border-radius: 12px; padding: 1.2rem; margin-bottom: 0.5rem; box-shadow: 0 4px 20px rgba(6, 182, 212, 0.15); display: flex; flex-direction: column; gap: 0.8rem;">
-                    <div style="font-size: 0.95rem; font-weight: 800; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid rgba(6, 182, 212, 0.2); padding-bottom: 0.4rem;">
-                        ✍️ 自訂售價利潤換算 (設定 ${labelPrefix} 實付試算):
-                    </div>
-                    <div style="display: flex; align-items: stretch; justify-content: space-around; flex-wrap: wrap; gap: 1rem;">
-                        
-                        <!-- 自訂打折前原價 (去郵費) -->
-                        <div style="text-align: center; flex: 1; min-width: 200px; padding: 0.8rem; background: rgba(236, 72, 153, 0.07); border: 1.5px solid rgba(236, 72, 153, 0.4); border-radius: 10px; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);">
-                            <span style="font-size: 0.82rem; color: #f9a8d4; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📢 ${labelPrefix} 商品刊登原價</span>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #f472b6; margin-top: 0.35rem; font-family: 'Outfit', sans-serif; text-shadow: 0 0 8px rgba(236, 72, 153, 0.25);">
-                                $${itemRetailUSD.toFixed(2)} <span style="font-size: 1.25rem; font-weight: 600; color: #f9a8d4;">/ ¥${itemRetailRMB.toFixed(2)}</span>
-                            </div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem;">（商品刊登之折扣前劃線原價，不含郵資）</div>
-                        </div>
-                        
-                        <!-- 自訂折後商品售價 (去郵費) -->
-                        <div style="text-align: center; flex: 1; min-width: 200px; padding: 0.8rem; background: rgba(6, 182, 212, 0.07); border: 1.5px solid rgba(6, 182, 212, 0.4); border-radius: 10px; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);">
-                            <span style="font-size: 0.82rem; color: #67e8f9; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">✨ ${labelPrefix} 商品刊登特價</span>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #22d3ee; margin-top: 0.35rem; font-family: 'Outfit', sans-serif; text-shadow: 0 0 12px rgba(6, 182, 212, 0.45);">
-                                $${itemSaleUSD.toFixed(2)} <span style="font-size: 1.25rem; font-weight: 600; color: #67e8f9;">/ ¥${itemSaleRMB.toFixed(2)}</span>
-                            </div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem;">（商品頁面上顯示的促銷單品價，去郵費）</div>
-                        </div>
-
-                        <!-- 自訂上架對照 (去郵商品與郵費) -->
-                        <div style="text-align: center; flex: 1; min-width: 200px; padding: 0.8rem; background: rgba(6, 182, 212, 0.07); border: 1.5px solid rgba(6, 182, 212, 0.4); border-radius: 10px; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15); display: flex; flex-direction: column; justify-content: space-between;">
-                            <span style="font-size: 0.82rem; color: #67e8f9; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🚚 ${labelPrefix} 上架對照 (商品與郵費)</span>
-                            <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.5rem; text-align: left; padding: 0 0.5rem; justify-content: center; flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.25rem;">
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);">去郵單品價 (RMB):</span>
-                                    <strong style="font-size: 1.1rem; color: #fff;">¥${itemSaleRMB.toFixed(2)}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.25rem;">
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);">去郵單品價 (USD):</span>
-                                    <strong style="font-size: 1.15rem; color: #22d3ee;">$${itemSaleUSD.toFixed(2)}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);">郵費換算 (USD):</span>
-                                    <strong style="font-size: 1.15rem; color: var(--accent-cyan);">$${shippingUSD.toFixed(2)}</strong>
-                                </div>
-                            </div>
-                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.4rem; text-align: center; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.25rem;">（買家實付總價：$${grossUSD.toFixed(2)} / ¥${grossRMB.toFixed(2)}）</div>
-                        </div>
-                        
-                    </div>
-                    <div style="text-align: center; font-size: 0.82rem; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                        <span>自訂實際淨利潤: <strong style="color: ${customProfitColor}; font-size: 0.9rem;">${isCustomPositive ? '¥' : '-¥'}${Math.abs(profitRMB).toFixed(2)} (${profitRate.toFixed(2)}%)</strong></span>
-                        <span style="color: rgba(255,255,255,0.15);">|</span>
-                        <span>總計費成本 (含平台手續): <strong>¥${displayedTotalCostRMB.toFixed(2)}</strong></span>
-                    </div>
-                </div>
-            `;
-        }
-
+        let comparisonHtml = '';
 
         // 3. ⚔️ 競爭對手定價分析 (If competitor price is entered)
         if (!isNaN(competitorUSD) && competitorUSD > 0) {
@@ -2184,25 +2238,22 @@
             const compProfitColor = isCompPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
 
             comparisonHtml += `
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(236, 72, 153, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(236, 72, 153, 0.15);">
-                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-pink); display: flex; align-items: center; gap: 0.25rem;">
-                        ⚔️ 競爭對手定價分析:
-                    </div>
-                    <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap;">
-                        <div>對手折後售價: <strong style="color: #fff;">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
-                        <div>對手平台佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
-                        <div>對手淨利潤: <strong style="color: ${compProfitColor};">${isCompPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)} (${competitorProfitRate.toFixed(2)}%)</strong></div>
+                <div style="grid-column: 1/-1; border-top: 1px dashed var(--glass-border); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(201, 74, 71, 0.04); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid rgba(201, 74, 71, 0.15); margin-top: 0.25rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-pink); display: flex; align-items: center; gap: 0.25rem;">
+                            ⚔️ 競爭對手定價分析:
+                        </div>
+                        <div style="display: flex; gap: 1.25rem; font-size: 0.82rem; flex-wrap: wrap; color: var(--text-main);">
+                            <div>對手折後售價: <strong style="color: var(--primary);">$${competitorUSD.toFixed(2)} (¥${competitorRMB.toFixed(2)})</strong></div>
+                            <div>對手平台佣金: <strong style="color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</strong></div>
+                            <div>對手淨利潤: <strong style="color: ${compProfitColor};">${isCompPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)} (${competitorProfitRate.toFixed(2)}%)</strong></div>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        comparisonHtml += `
-            </div>
-        `;
-
         html += comparisonHtml;
-
         resultPanel.innerHTML = html;
     }
 
@@ -2332,19 +2383,19 @@
             const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
 
             const isPositive = competitorProfitRMB >= 0;
-            const profitColor = isPositive ? '#10b981' : '#ec4899';
+            const profitColor = isPositive ? 'var(--accent-green)' : 'var(--accent-pink)';
             const primaryMarker = code === primaryCountry ? '<span style="color:var(--primary); font-weight:700;">★ </span>' : '';
 
             html += `
-                <tr style="${code === primaryCountry ? 'background: rgba(139, 92, 246, 0.08);' : ''}">
+                <tr style="${code === primaryCountry ? 'background: rgba(43, 76, 126, 0.06);' : ''}">
                     <td style="font-weight:600; padding: 0.3rem 0.5rem;">${primaryMarker}${rates.name} (${rates.code})</td>
                     <td style="text-align:center; padding: 0.3rem 0.5rem;">${weight.toFixed(3)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">¥${shippingRMB.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem;">¥${displayedTotalCostRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:#10b981;">¥${saleRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:#10b981;">$${saleUSD.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:#a78bfa;">¥${retailRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:#a78bfa;">$${retailUSD.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:var(--accent-green);">¥${saleRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:var(--accent-green);">$${saleUSD.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-pink);">¥${retailRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-pink);">$${retailUSD.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">$${competitorUSD.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:700; color:${profitColor};">${isPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</td>
                     <td style="text-align:center; font-weight:700; color:${profitColor}; padding: 0.3rem 0.5rem;">${competitorProfitRate.toFixed(2)}%</td>
@@ -2447,7 +2498,7 @@
                         <span class="expand-btn" id="btn-exp-${itemKey}" onclick="toggleExpandRow('${itemKey}')">${isExpanded ? '▼' : '▶'}</span>
                     </td>
                     <td style="text-align: center;"><span class="badge badge-purple">${currentSheet}</span></td>
-                    <td style="font-weight:600; color:#fff;">${item.code}</td>
+                    <td style="font-weight:600; color:var(--text-main);">${item.code}</td>
                     <td style="font-weight:500; text-align: right; padding-right: 0.8rem;">¥${item.cost.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0.001" value="${weight.toFixed(3)}" 
@@ -2483,7 +2534,7 @@
                 const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
                 
                 const isPositive = competitorProfitRMB >= 0;
-                const profitColorStyle = isPositive ? 'color: #10b981;' : 'color: #ec4899;';
+                const profitColorStyle = isPositive ? 'color: var(--accent-green);' : 'color: var(--accent-pink);';
                 const profitSymbol = isPositive ? '¥' : '-¥';
                 const absProfitVal = Math.abs(competitorProfitRMB).toFixed(2);
                 
@@ -2492,31 +2543,31 @@
                         <span class="expand-btn" id="btn-exp-${itemKey}" onclick="toggleExpandRow('${itemKey}')">${isExpanded ? '▼' : '▶'}</span>
                     </td>
                     <td style="text-align: center;"><span class="badge badge-purple">${currentSheet}</span></td>
-                    <td style="font-weight:600; color:#fff;">${item.code}</td>
+                    <td style="font-weight:600; color:var(--text-main);">${item.code}</td>
                     <td style="font-weight:500; text-align: right; padding-right: 0.8rem;">¥${item.cost.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0.001" value="${weight.toFixed(3)}" 
                             onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:70px;">
                     </td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
-                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: #fff;">¥${displayedTotalCostRMB.toFixed(2)}</td>
+                    <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: var(--text-main);">¥${displayedTotalCostRMB.toFixed(2)}</td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${competitorPriceRMB.toFixed(2)}</td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0" value="${competitorPriceUSD.toFixed(2)}" 
-                            onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:80px; border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05);">
+                            onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:80px;">
                     </td>
                     <td style="text-align: right; padding-right: 0.8rem; color: var(--text-muted);">¥${competitorFeeRMB.toFixed(2)}</td>
                     <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; ${profitColorStyle}">${profitSymbol}${absProfitVal}</td>
                     <td class="highlight-text" style="text-align: center; ${profitColorStyle}">${competitorProfitRate.toFixed(2)}%</td>
                     <td style="text-align: center;">
-                        <span class="badge badge-cyan" style="background: rgba(236,72,153,0.15); color: #ec4899; border: 1px solid rgba(236,72,153,0.3);">⚔️ 對手</span>
+                        <span class="badge badge-coral">⚔️ 對手</span>
                     </td>
                 `;
 
                 // Generate your suggested pricing row directly underneath
                 let trYour = document.createElement('tr');
                 trYour.id = `row-your-${itemKey}`;
-                trYour.style.borderBottom = '1px solid rgba(255, 255, 255, 0.12)';
+                trYour.style.borderBottom = '1px solid var(--glass-border)';
                 
                 const yourFeeRMB = salePriceRMB * (platformFeeRate / 100);
                 const yourNetRevenueRMB = salePriceRMB - yourFeeRMB;
@@ -2524,32 +2575,32 @@
                 const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
                 
                 const isYourPositive = yourProfitRMB >= 0;
-                const yourProfitColorStyle = isYourPositive ? 'color: #10b981;' : 'color: #ec4899;';
+                const yourProfitColorStyle = isYourPositive ? 'color: var(--accent-green);' : 'color: var(--accent-pink);';
                 const yourProfitSymbol = isYourPositive ? '¥' : '-¥';
                 const absYourProfitVal = Math.abs(yourProfitRMB).toFixed(2);
                 
                 trYour.innerHTML = `
-                    <td colspan="7" style="text-align: right; font-weight: 700; color: var(--accent-green); background: rgba(16, 185, 129, 0.03); padding-right: 1.2rem;">
+                    <td colspan="7" style="text-align: right; font-weight: 700; color: var(--accent-green); background: rgba(74, 112, 85, 0.03); padding-right: 1.2rem;">
                         🛡️ 您的建議定價對比:
                     </td>
-                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(16, 185, 129, 0.03);">
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(74, 112, 85, 0.03);">
                         ¥${salePriceRMB.toFixed(2)}
                         ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
                     </td>
-                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(16, 185, 129, 0.03);">
+                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(74, 112, 85, 0.03);">
                         $${salePriceUSD.toFixed(2)}
                     </td>
-                    <td style="text-align: right; padding-right: 0.8rem; color: var(--text-muted); background: rgba(16, 185, 129, 0.03);">
+                    <td style="text-align: right; padding-right: 0.8rem; color: var(--text-muted); background: rgba(74, 112, 85, 0.03);">
                         ¥${yourFeeRMB.toFixed(2)}
                     </td>
-                    <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; ${yourProfitColorStyle} background: rgba(16, 185, 129, 0.03);">
+                    <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; ${yourProfitColorStyle} background: rgba(74, 112, 85, 0.03);">
                         ${yourProfitSymbol}${absYourProfitVal}
                     </td>
-                    <td class="highlight-text" style="text-align: center; ${yourProfitColorStyle} background: rgba(16, 185, 129, 0.03);">
+                    <td class="highlight-text" style="text-align: center; ${yourProfitColorStyle} background: rgba(74, 112, 85, 0.03);">
                         ${yourProfitRate.toFixed(2)}%
                     </td>
-                    <td style="text-align: center; background: rgba(16, 185, 129, 0.03);">
-                        <span class="badge badge-purple" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);">🛡️ 您的建議</span>
+                    <td style="text-align: center; background: rgba(74, 112, 85, 0.03);">
+                        <span class="badge badge-green">🛡️ 您的建議</span>
                     </td>
                 `;
             }
@@ -2563,17 +2614,17 @@
             expTr.id = `row-exp-${itemKey}`;
             expTr.style.display = isExpanded ? 'table-row' : 'none';
             expTr.innerHTML = `
-                <td colspan="13" style="padding: 0.4rem 0.75rem; background: rgba(15, 23, 42, 0.45);">
-                    <div style="border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden; background: rgba(10, 15, 26, 0.9); padding: 0.4rem;">
-                        <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.3rem;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px; height:14px; stroke:var(--accent-cyan);">
+                <td colspan="13" style="padding: 0.4rem 0.75rem; background: #faf8f5;">
+                    <div style="border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden; background: #ffffff; padding: 0.4rem;">
+                        <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--primary); display: flex; align-items: center; gap: 0.3rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px; height:14px; stroke:var(--primary);">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m0 18l6-3m-6 3V2m6 15l5.447 2.724A1 1 0 0021 18.82V8.058a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 2" />
                             </svg>
                             自選比較國家/地區 多國定價分析結果 (商品型號: ${item.code})
                         </div>
                         <table style="width: 100%; font-size: 0.76rem; border-collapse: collapse;">
                             <thead>
-                                <tr style="background: rgba(255,255,255,0.03);">
+                                <tr style="background: #faf8f5;">
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem;">對比國家</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">計費重量 (KG)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">無憂標準運費</th>
@@ -3015,19 +3066,18 @@
             const corsAlert = document.getElementById('corsAlert');
             if (corsAlert) {
                 corsAlert.style.display = 'block';
-                corsAlert.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-                corsAlert.style.background = 'rgba(239, 68, 68, 0.05)';
+                corsAlert.className = 'warning-banner';
                 
                 let html = `
-                    <h3 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: #ef4444; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; stroke: #ef4444;">
+                    <h3 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-pink); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; stroke: var(--accent-pink);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                         📊 系統檔案自動加載診斷提示 (Auto-load Diagnostics)
                     </h3>
-                    <div style="font-size: 0.88rem; line-height: 1.6; color: #f3f4f6;">
+                    <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-main);">
                         💡 當前系統自動載入 Excel 檔案時遇到以下問題，請根據提示進行排除：<br>
-                        <div style="margin: 0.5rem 0; padding: 0.6rem; background: rgba(0,0,0,0.25); border-radius: 6px; font-family: monospace; font-size: 0.82rem; color: #fca5a5; display: flex; flex-direction: column; gap: 0.35rem;">
+                        <div style="margin: 0.5rem 0; padding: 0.6rem; background: rgba(0,0,0,0.03); border: 1px solid var(--glass-border); border-radius: 6px; font-family: monospace; font-size: 0.82rem; color: var(--accent-pink); display: flex; flex-direction: column; gap: 0.35rem;">
                             ${diagnosticErrors.map(e => `<div>${e}</div>`).join('')}
                         </div>
                         <strong>✨ 自救排查方案：</strong><br>
