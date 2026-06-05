@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- SheetJS (xlsx) via jsDelivr CDN -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- OpenCC-JS for Traditional & Simplified Chinese Conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.3.0/dist/umd/full.js"></script>
     
     <style>
         :root {
@@ -879,6 +881,35 @@
             border-color: var(--accent-green);
         }
 
+        /* Language Switcher */
+        .lang-switch {
+            display: flex;
+            background: #eae6db;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2px;
+            width: fit-content;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.78rem;
+            cursor: pointer;
+            padding: 0.25rem 0.75rem;
+            border-radius: 18px;
+            transition: all var(--transition-speed);
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(43, 76, 126, 0.2);
+        }
+
         /* Grid for Manual Calculator Results */
         .manual-result-card {
             display: grid;
@@ -991,6 +1022,10 @@
 
 <div class="container">
     <header>
+        <div class="lang-switch" style="position: absolute; top: 0; right: 0;">
+            <button id="langTwBtn" class="lang-btn active" onclick="switchLanguage('tw')">繁體</button>
+            <button id="langCnBtn" class="lang-btn" onclick="switchLanguage('cn')">简体</button>
+        </div>
         <h1>速賣通跨境定價與運費計算系統</h1>
         <p>提供 AliExpress Standard Shipping（無憂標準）多國運費精確試算，高密度工作表批量調整與一鍵 XLS 導出</p>
     </header>
@@ -1092,7 +1127,7 @@
             <!-- 6. 活動折扣 (%) (折扣) -->
             <div class="input-group">
                 <label style="color: var(--accent-green); font-size: 0.72rem; white-space: nowrap;">活動折扣 (%)</label>
-                <input type="number" id="manualDiscount" class="input-control" value="30" step="1" min="0" max="99" oninput="calculateManualPrice()">
+                <input type="number" id="manualDiscount" class="input-control" value="0" step="1" min="0" max="99" oninput="calculateManualPrice()">
             </div>
             <!-- 7. 對手售價 (對手) -->
             <div class="input-group">
@@ -1240,7 +1275,7 @@
                 <!-- Default Activity Campaign Discount (%) -->
                 <div class="input-group">
                     <label>預設活動折扣 (%)</label>
-                    <input type="number" class="input-control" id="defaultActivityDiscount" value="15" step="1" min="0" max="100" oninput="updateGlobalSettings()">
+                    <input type="number" class="input-control" id="defaultActivityDiscount" value="0" step="1" min="0" max="100" oninput="updateGlobalSettings()">
                 </div>
 
                 <!-- Shipping Extra Discount (%) -->
@@ -1329,12 +1364,12 @@
                             <th>採購成本 (RMB)</th>
                             <th>商品重量 (KG)</th>
                             <th>活動折扣 (%)</th>
+                            <th>平台手續 (%)</th>
                             <th>無憂標準運費 (RMB)</th>
+                            <th>自訂售價 (RMB)</th>
                             <th>實際利潤 (%)</th>
-                            <th>折後價格 (RMB)</th>
-                            <th>折後價格 (USD)</th>
-                            <th>打折前價格 (RMB)</th>
-                            <th>打折前價格 (USD)</th>
+                            <th>折後價格 (RMB / USD)</th>
+                            <th>打折前價格 (RMB / USD)</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -1394,6 +1429,85 @@
 
     let manualCalcMode = 'price'; // 'price' or 'margin'
 
+    // Language Settings State
+    let appLanguage = 'tw'; // 'tw' or 'cn'
+    let t2sConverterInstance = null;
+    let s2tConverterInstance = null;
+
+    function switchLanguage(lang) {
+        if (lang === appLanguage) return;
+        
+        appLanguage = lang;
+        localStorage.setItem('appLanguage', lang);
+        
+        const twBtn = document.getElementById('langTwBtn');
+        const cnBtn = document.getElementById('langCnBtn');
+        if (twBtn && cnBtn) {
+            if (lang === 'tw') {
+                twBtn.classList.add('active');
+                cnBtn.classList.remove('active');
+            } else {
+                cnBtn.classList.add('active');
+                twBtn.classList.remove('active');
+            }
+        }
+        
+        if (typeof OpenCC !== 'undefined') {
+            translateDOM(document.body, lang);
+        }
+        
+        calculateManualPrice();
+        if (shippingRates && Object.keys(productsData).length > 0) {
+            renderTable();
+        }
+    }
+
+    function translateDOM(element = document.body, toLang = appLanguage) {
+        if (typeof OpenCC === 'undefined') return;
+        
+        try {
+            if (toLang === 'cn') {
+                if (!t2sConverterInstance) {
+                    t2sConverterInstance = OpenCC.Converter({ from: 'tw', to: 'cn' });
+                }
+                const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+                let node;
+                while (node = walker.nextNode()) {
+                    const parentTag = node.parentElement ? node.parentElement.tagName.toLowerCase() : '';
+                    if (parentTag === 'script' || parentTag === 'style') continue;
+                    node.nodeValue = t2sConverterInstance(node.nodeValue);
+                }
+                const inputs = element.querySelectorAll('input[placeholder]');
+                inputs.forEach(input => {
+                    input.placeholder = t2sConverterInstance(input.placeholder);
+                });
+            } else {
+                if (!s2tConverterInstance) {
+                    s2tConverterInstance = OpenCC.Converter({ from: 'cn', to: 'tw' });
+                }
+                const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+                let node;
+                while (node = walker.nextNode()) {
+                    const parentTag = node.parentElement ? node.parentElement.tagName.toLowerCase() : '';
+                    if (parentTag === 'script' || parentTag === 'style') continue;
+                    node.nodeValue = s2tConverterInstance(node.nodeValue);
+                }
+                const inputs = element.querySelectorAll('input[placeholder]');
+                inputs.forEach(input => {
+                    input.placeholder = s2tConverterInstance(input.placeholder);
+                });
+            }
+        } catch (e) {
+            console.error('Translation error:', e);
+        }
+    }
+
+    function translateIfCN(element) {
+        if (appLanguage === 'cn') {
+            translateDOM(element, 'cn');
+        }
+    }
+
     function setManualCalcMode(mode) {
         manualCalcMode = mode;
         
@@ -1414,10 +1528,26 @@
             marginGroup.style.display = 'flex';
         }
         calculateManualPrice();
+        
+        // Update batch view mode to reflect active mode columns
+        setViewMode(currentViewMode);
     }
 
     // Event Bindings for Drag & Drop / Selection
     document.addEventListener('DOMContentLoaded', () => {
+        const savedLang = localStorage.getItem('appLanguage');
+        if (savedLang && savedLang === 'cn') {
+            appLanguage = 'cn';
+            const twBtn = document.getElementById('langTwBtn');
+            const cnBtn = document.getElementById('langCnBtn');
+            if (twBtn && cnBtn) {
+                cnBtn.classList.add('active');
+                twBtn.classList.remove('active');
+            }
+            setTimeout(() => {
+                translateDOM(document.body, 'cn');
+            }, 50);
+        }
         setupDragAndDrop();
         setupFileSelectors();
         setupDropdownTrigger();
@@ -1583,6 +1713,7 @@
             const fileInfo = document.getElementById('shippingFileInfo');
             fileInfo.innerText = `已讀取 ${Object.keys(rates).length} 個國家/地區的配送報價。`;
             fileInfo.style.display = 'block';
+            translateIfCN(zone);
 
             // Check if US is available to set defaults
             if (rates['US']) {
@@ -1654,6 +1785,7 @@
         });
 
         updateDropdownTriggerText();
+        translateIfCN(itemsContainer);
     }
 
     // Populate the searchable dropdown inside the top manual calculator
@@ -1695,6 +1827,7 @@
         });
 
         updateManualDropdownTriggerText();
+        translateIfCN(itemsContainer);
     }
 
     function handleManualCountrySearch(val) {
@@ -1711,12 +1844,13 @@
     function updateManualDropdownTriggerText() {
         const trigger = document.getElementById('manualCountryDropdownTrigger').querySelector('span');
         if (!shippingRates || !shippingRates[manualPrimaryCountry]) {
-            trigger.innerText = '選擇國家...';
+            trigger.innerText = (appLanguage === 'cn' && t2sConverterInstance) ? t2sConverterInstance('選擇國家...') : '選擇國家...';
             return;
         }
 
         const name = shippingRates[manualPrimaryCountry].name;
-        trigger.innerText = `${name} (${manualPrimaryCountry})`;
+        const text = `${name} (${manualPrimaryCountry})`;
+        trigger.innerText = (appLanguage === 'cn' && t2sConverterInstance) ? t2sConverterInstance(text) : text;
     }
 
     function handleManualPriceTypeChange() {
@@ -1773,8 +1907,8 @@
     }
 
     function selectDefaultPopularCountries() {
-        // Common AliExpress core markets
-        const popular = ['US', 'RU', 'FR', 'ES', 'GB', 'BR', 'CA', 'DE', 'IT', 'KR', 'JP'];
+        // Core AliExpress markets requested by user (exactly 16 countries starting with RU)
+        const popular = ['RU', 'ES', 'FR', 'BR', 'US', 'KR', 'MX', 'CL', 'UA', 'PL', 'DE', 'GB', 'NL', 'IT', 'AU', 'CA'];
         selectedComparativeCountries.clear();
         selectedComparativeCountries.add(primaryCountry);
         popular.forEach(code => {
@@ -1790,13 +1924,14 @@
     function updateDropdownTriggerText() {
         const trigger = document.getElementById('countryDropdownTrigger').querySelector('span');
         if (!shippingRates || !shippingRates[primaryCountry]) {
-            trigger.innerText = '選擇國家...';
+            trigger.innerText = (appLanguage === 'cn' && t2sConverterInstance) ? t2sConverterInstance('選擇國家...') : '選擇國家...';
             return;
         }
 
         const primaryName = shippingRates[primaryCountry].name;
         const totalSelected = selectedComparativeCountries.size;
-        trigger.innerText = `${primaryName} (已勾選 ${totalSelected} 個比較國)`;
+        const text = `${primaryName} (已勾選 ${totalSelected} 個比較國)`;
+        trigger.innerText = (appLanguage === 'cn' && t2sConverterInstance) ? t2sConverterInstance(text) : text;
     }
 
     // Parse "速賣通價格計算工具.xlsx" Product Database
@@ -1833,6 +1968,7 @@
 
                 let nameColIdx = 2; 
                 let costColIdx = 3;
+                let priceColIdx = -1;
 
                 headers.forEach((h, idx) => {
                     if (h) {
@@ -1849,6 +1985,8 @@
                         if (val === '售價' || val === '售价') {
                             if (sheetName !== 'XK' && sheetName !== 'XZ板子') {
                                 costColIdx = idx;
+                            } else {
+                                priceColIdx = idx;
                             }
                         }
                     }
@@ -1871,7 +2009,8 @@
                         rowIdx: r,
                         originalRow: row, 
                         nameColIdx: nameColIdx,
-                        costColIdx: costColIdx
+                        costColIdx: costColIdx,
+                        priceColIdx: priceColIdx
                     });
                 }
 
@@ -1888,6 +2027,7 @@
             Object.values(productsData).forEach(arr => totalProd += arr.length);
             fileInfo.innerText = `已讀取 ${Object.keys(productsData).length} 個工作表，共 ${totalProd} 筆商品。`;
             fileInfo.style.display = 'block';
+            translateIfCN(zone);
 
             buildSheetTabs();
             checkVerificationAndShowDashboard();
@@ -1915,6 +2055,7 @@
         });
 
         currentSheet = sheets[0];
+        translateIfCN(tabsContainer);
     }
 
     function selectSheetTab(sheetName, buttonEl) {
@@ -2255,6 +2396,7 @@
 
         html += comparisonHtml;
         resultPanel.innerHTML = html;
+        translateIfCN(resultPanel);
     }
 
     // UI Updates on Global Configuration Input
@@ -2335,7 +2477,7 @@
 
         const override = itemOverrides[itemKey] || {};
         const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
-        const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
+        const defaultActDisc = isNaN(parseFloat(document.getElementById('defaultActivityDiscount').value)) ? 0 : parseFloat(document.getElementById('defaultActivityDiscount').value);
         const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
         const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
         const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
@@ -2343,41 +2485,104 @@
         const domesticShippingRMB = parseFloat(document.getElementById('domesticShipping').value) || 0;
         const customsFeeRMB = parseFloat(document.getElementById('customsFee').value) || 0;
         const platformFeeRate = parseFloat(document.getElementById('platformFeeRate').value) || 10;
+        const platformFeeRateVal = (override.platformFeeRate !== undefined) ? override.platformFeeRate : platformFeeRate;
 
         const weight = (override.weight !== undefined) ? override.weight : defaultWt;
         const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
         const margin = (override.margin !== undefined) ? override.margin : (targetMargPercentage / 100);
 
         let html = '';
+        const popularOrder = ['RU', 'ES', 'FR', 'BR', 'US', 'KR', 'MX', 'CL', 'UA', 'PL', 'DE', 'GB', 'NL', 'IT', 'AU', 'CA'];
+        const sortedCountries = Array.from(selectedComparativeCountries).sort((a, b) => {
+            const idxA = popularOrder.indexOf(a);
+            const idxB = popularOrder.indexOf(b);
+            if (idxA !== -1 && idxB !== -1) {
+                return idxA - idxB;
+            }
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return a.localeCompare(b);
+        });
 
-        selectedComparativeCountries.forEach(code => {
+        sortedCountries.forEach(code => {
             if (!shippingRates[code]) return;
             const rates = shippingRates[code];
 
             const shippingRMB = calculateBaseShippingRMB(code, weight, isSpecialCargo);
             const totalCostRMB = currentItem.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
-            const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+            const netPlatformFactor = 1 - Math.min(99, platformFeeRateVal) / 100;
             const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
             const totalDiscount = Math.min(99, activityDiscount + extraDisc);
             const netDiscountFactor = 1 - totalDiscount / 100;
 
-            let saleUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
-            let retailUSD = saleUSD / netDiscountFactor;
+            let saleUSD = 0;
+            let retailUSD = 0;
+            let saleRMB = 0;
+            let retailRMB = 0;
+            let finalProfitRate = 0;
 
-            if (excludeShippingFee) {
-                const shipUSD = shippingRMB / exchRate;
-                saleUSD = Math.max(0.01, saleUSD - shipUSD);
-                retailUSD = Math.max(0.01, retailUSD - shipUSD);
+            if (manualCalcMode === 'price') {
+                // Mode 1: 自訂售價模式
+                let defaultPrice = 0;
+                if (currentItem.priceColIdx !== -1 && currentItem.originalRow[currentItem.priceColIdx] !== undefined) {
+                    defaultPrice = parseFloat(currentItem.originalRow[currentItem.priceColIdx]) || 0;
+                } else {
+                    defaultPrice = totalCostRMB * (1 + targetMargPercentage / 100) - shippingRMB;
+                    defaultPrice = Math.max(0, defaultPrice);
+                }
+
+                const myPriceRMB = (override.customPriceRMB !== undefined) ? override.customPriceRMB : defaultPrice;
+
+                // Mode 1 formulas
+                const isBaoYouInput = !excludeShippingFee;
+                let displayInputPriceRMB = 0;
+                let displayDiscountedPriceRMB = 0;
+                let myGrossPriceRMB = 0;
+                let suggestedRetailRMB = 0;
+
+                if (isBaoYouInput) {
+                    displayInputPriceRMB = myPriceRMB + shippingRMB;
+                    myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
+                    displayDiscountedPriceRMB = myGrossPriceRMB;
+                    suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
+                } else {
+                    displayInputPriceRMB = myPriceRMB;
+                    displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                    myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
+                    suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
+                }
+
+                const myCommissionRMB = myGrossPriceRMB * (platformFeeRateVal / 100);
+                const myNetRevenueRMB = myGrossPriceRMB - myCommissionRMB;
+                const myProfitRMB = myNetRevenueRMB - totalCostRMB;
+                const myProfitRate = (myProfitRMB / totalCostRMB) * 100;
+
+                saleRMB = displayDiscountedPriceRMB;
+                saleUSD = displayDiscountedPriceRMB / exchRate;
+                retailRMB = suggestedRetailRMB;
+                retailUSD = suggestedRetailRMB / exchRate;
+                finalProfitRate = myProfitRate;
+            } else {
+                // Mode 2: 目標利潤模式
+                saleUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+                retailUSD = saleUSD / netDiscountFactor;
+
+                if (excludeShippingFee) {
+                    const shipUSD = shippingRMB / exchRate;
+                    saleUSD = Math.max(0.01, saleUSD - shipUSD);
+                    retailUSD = Math.max(0.01, retailUSD - shipUSD);
+                }
+
+                saleRMB = saleUSD * exchRate;
+                retailRMB = retailUSD * exchRate;
+                finalProfitRate = margin * 100;
             }
-
-            const saleRMB = saleUSD * exchRate;
-            const retailRMB = retailUSD * exchRate;
 
             // Competitor Analysis part
             const competitorUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : saleUSD;
             const competitorRMB = competitorUSD * exchRate;
-            const competitorFeeRMB = competitorRMB * (platformFeeRate / 100);
+            const competitorFeeRMB = competitorRMB * (platformFeeRateVal / 100);
             const competitorNetRevenueRMB = competitorRMB - competitorFeeRMB;
             const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
             const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
@@ -2392,10 +2597,12 @@
                     <td style="text-align:center; padding: 0.3rem 0.5rem;">${weight.toFixed(3)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">¥${shippingRMB.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem;">¥${displayedTotalCostRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:var(--accent-green);">¥${saleRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:var(--accent-green);">$${saleUSD.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-pink);">¥${retailRMB.toFixed(2)}</td>
-                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-pink);">$${retailUSD.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:var(--accent-green);">
+                        ¥${saleRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${saleUSD.toFixed(2)}</small>
+                    </td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-pink);">
+                        ¥${retailRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${retailUSD.toFixed(2)}</small>
+                    </td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">$${competitorUSD.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:700; color:${profitColor};">${isPositive ? '¥' : '-¥'}${Math.abs(competitorProfitRMB).toFixed(2)}</td>
                     <td style="text-align:center; font-weight:700; color:${profitColor}; padding: 0.3rem 0.5rem;">${competitorProfitRate.toFixed(2)}%</td>
@@ -2404,6 +2611,7 @@
         });
 
         detailContainer.innerHTML = html;
+        translateIfCN(detailContainer);
     }
 
     // Dynamic UI Table Rendering
@@ -2444,7 +2652,7 @@
 
         // Core global parameters
         const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
-        const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
+        const defaultActDisc = isNaN(parseFloat(document.getElementById('defaultActivityDiscount').value)) ? 0 : parseFloat(document.getElementById('defaultActivityDiscount').value);
         const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
         const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
         const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
@@ -2464,27 +2672,104 @@
             const weight = (override.weight !== undefined) ? override.weight : defaultWt;
             const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
             const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
-            const margin = (override.margin !== undefined) ? override.margin : targetMargin;
 
             const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
 
-            const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+            const platformFeeRateVal = (override.platformFeeRate !== undefined) ? override.platformFeeRate : platformFeeRate;
+            const netPlatformFactor = 1 - Math.min(99, platformFeeRateVal) / 100;
             const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
             const totalDiscount = Math.min(99, activityDiscount + extraDisc);
             const netDiscountFactor = 1 - totalDiscount / 100;
 
-            let salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
-            let retailPriceUSD = salePriceUSD / netDiscountFactor;
+            // Decide Mode 1 vs Mode 2 calculations
+            let salePriceUSD = 0;
+            let retailPriceUSD = 0;
+            let salePriceRMB = 0;
+            let retailPriceRMB = 0;
+            let finalMarginVal = 0; 
+            let displayPriceInputHTML = ''; 
+            let displayMarginHTML = '';      
 
-            // Apply Exclude Shipping toggle
-            if (excludeShippingFee) {
-                const shipUSD = shippingRMB / exchRate;
-                salePriceUSD = Math.max(0.01, salePriceUSD - shipUSD);
-                retailPriceUSD = Math.max(0.01, retailPriceUSD - shipUSD);
+            if (manualCalcMode === 'price') {
+                // Mode 1: 自訂售價模式
+                let defaultPrice = 0;
+                if (item.priceColIdx !== -1 && item.originalRow[item.priceColIdx] !== undefined) {
+                    defaultPrice = parseFloat(item.originalRow[item.priceColIdx]) || 0;
+                } else {
+                    defaultPrice = totalCostRMB * (1 + targetMargin) - shippingRMB;
+                    defaultPrice = Math.max(0, defaultPrice);
+                }
+
+                const myPriceRMB = (override.customPriceRMB !== undefined) ? override.customPriceRMB : defaultPrice;
+
+                // Mode 1 Formulas
+                const isBaoYouInput = !excludeShippingFee;
+                let displayInputPriceRMB = 0;
+                let displayDiscountedPriceRMB = 0;
+                let myGrossPriceRMB = 0;
+                let suggestedRetailRMB = 0;
+
+                if (isBaoYouInput) {
+                    displayInputPriceRMB = myPriceRMB + shippingRMB;
+                    myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
+                    displayDiscountedPriceRMB = myGrossPriceRMB;
+                    suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
+                } else {
+                    displayInputPriceRMB = myPriceRMB;
+                    displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                    myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
+                    suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
+                }
+
+                const myCommissionRMB = myGrossPriceRMB * (platformFeeRateVal / 100);
+                const myNetRevenueRMB = myGrossPriceRMB - myCommissionRMB;
+                const myProfitRMB = myNetRevenueRMB - totalCostRMB;
+                const myProfitRate = (myProfitRMB / totalCostRMB) * 100;
+
+                salePriceRMB = displayDiscountedPriceRMB;
+                salePriceUSD = displayDiscountedPriceRMB / exchRate;
+                retailPriceRMB = suggestedRetailRMB;
+                retailPriceUSD = suggestedRetailRMB / exchRate;
+                finalMarginVal = myProfitRate;
+
+                // HTML elements
+                displayPriceInputHTML = `
+                    <td style="text-align: center;">
+                        <input type="number" class="table-input" step="0.1" min="0" value="${myPriceRMB.toFixed(1)}" 
+                            onchange="handleRowOverride('${item.code}', 'customPriceRMB', this.value)" style="width:75px;">
+                    </td>
+                `;
+                displayMarginHTML = `
+                    <td class="highlight-text" style="text-align: center; color: ${myProfitRMB >= 0 ? 'var(--accent-green)' : 'var(--accent-pink)'};">
+                        ${myProfitRate.toFixed(1)}%
+                    </td>
+                `;
+            } else {
+                // Mode 2: 目標利潤模式
+                const margin = (override.margin !== undefined) ? override.margin : targetMargin;
+                salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+                retailPriceUSD = salePriceUSD / netDiscountFactor;
+
+                // Apply Exclude Shipping toggle
+                if (excludeShippingFee) {
+                    const shipUSD = shippingRMB / exchRate;
+                    salePriceUSD = Math.max(0.01, salePriceUSD - shipUSD);
+                    retailPriceUSD = Math.max(0.01, retailPriceUSD - shipUSD);
+                }
+
+                salePriceRMB = salePriceUSD * exchRate;
+                retailPriceRMB = retailPriceUSD * exchRate;
+                finalMarginVal = margin * 100;
+
+                // HTML elements
+                displayPriceInputHTML = `
+                    <td style="text-align: center;">
+                        <input type="number" class="table-input" step="1" min="-99" max="99" value="${Math.round(margin * 100)}" 
+                            onchange="handleRowOverride('${item.code}', 'margin', this.value)" style="width:55px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
+                    </td>
+                `;
+                displayMarginHTML = '';
             }
-
-            const salePriceRMB = salePriceUSD * exchRate;
-            const retailPriceRMB = retailPriceUSD * exchRate;
 
             const isExpanded = expandedRows.has(itemKey);
 
@@ -2505,30 +2790,28 @@
                             onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:70px;">
                     </td>
                     <td style="text-align: center; white-space: nowrap;">
-                        <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted); margin-right:3px;">${Math.round(platformFeeRate)}+</span>
                         <input type="number" class="table-input" step="1" min="0" max="100" value="${Math.round(activityDiscount)}" 
                             onchange="handleRowOverride('${item.code}', 'activityDiscount', this.value)" style="width:50px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
                     </td>
+                    <td style="text-align: center; white-space: nowrap;">
+                        <input type="number" class="table-input" step="0.1" min="0" max="100" value="${platformFeeRateVal.toFixed(1)}" 
+                            onchange="handleRowOverride('${item.code}', 'platformFeeRate', this.value)" style="width:50px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
+                    </td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
-                    <td style="text-align: center;">
-                        <input type="number" class="table-input" step="1" min="-99" max="99" value="${Math.round(margin * 100)}" 
-                            onchange="handleRowOverride('${item.code}', 'margin', this.value)" style="width:55px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
-                    </td>
+                    ${displayPriceInputHTML}
+                    ${displayMarginHTML}
                     <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.6rem;">
-                        ¥${salePriceRMB.toFixed(2)}
+                        ¥${salePriceRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${salePriceUSD.toFixed(2)}</small>
                         ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
                     </td>
-                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.6rem;">$${salePriceUSD.toFixed(2)}</td>
                     <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 0.6rem;">
-                        ¥${retailPriceRMB.toFixed(2)}
-                        ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
+                        ¥${retailPriceRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${retailPriceUSD.toFixed(2)}</small>
                     </td>
-                    <td class="highlight-text highlight-purple" style="text-align: right; padding-right: 0.6rem;">$${retailPriceUSD.toFixed(2)}</td>
                 `;
             } else {
                 const competitorPriceUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : salePriceUSD;
                 const competitorPriceRMB = competitorPriceUSD * exchRate;
-                const competitorFeeRMB = competitorPriceRMB * (platformFeeRate / 100);
+                const competitorFeeRMB = competitorPriceRMB * (platformFeeRateVal / 100);
                 const competitorNetRevenueRMB = competitorPriceRMB - competitorFeeRMB;
                 const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
                 const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
@@ -2551,7 +2834,9 @@
                     </td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
                     <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: var(--text-main);">¥${displayedTotalCostRMB.toFixed(2)}</td>
-                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${competitorPriceRMB.toFixed(2)}</td>
+                    <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">
+                        ¥${competitorPriceRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${competitorPriceUSD.toFixed(2)}</small>
+                    </td>
                     <td style="text-align: center;">
                         <input type="number" class="table-input" step="0.01" min="0" value="${competitorPriceUSD.toFixed(2)}" 
                             onchange="handleCompetitorPriceOverride('${item.code}', this.value)" style="width:80px;">
@@ -2569,7 +2854,7 @@
                 trYour.id = `row-your-${itemKey}`;
                 trYour.style.borderBottom = '1px solid var(--glass-border)';
                 
-                const yourFeeRMB = salePriceRMB * (platformFeeRate / 100);
+                const yourFeeRMB = salePriceRMB * (platformFeeRateVal / 100);
                 const yourNetRevenueRMB = salePriceRMB - yourFeeRMB;
                 const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
                 const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
@@ -2584,12 +2869,10 @@
                         🛡️ 您的建議定價對比:
                     </td>
                     <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(74, 112, 85, 0.03);">
-                        ¥${salePriceRMB.toFixed(2)}
+                        ¥${salePriceRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${salePriceUSD.toFixed(2)}</small>
                         ${excludeShippingFee ? '<span style="font-size:0.65rem; color:var(--text-muted); display:block; font-weight:normal;">(不含運)</span>' : ''}
                     </td>
-                    <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(74, 112, 85, 0.03);">
-                        $${salePriceUSD.toFixed(2)}
-                    </td>
+                    <td style="background: rgba(74, 112, 85, 0.03);"></td>
                     <td style="text-align: right; padding-right: 0.8rem; color: var(--text-muted); background: rgba(74, 112, 85, 0.03);">
                         ¥${yourFeeRMB.toFixed(2)}
                     </td>
@@ -2629,10 +2912,8 @@
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">計費重量 (KG)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">無憂標準運費</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">總成本 (RMB)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">折後價格 (RMB)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">折後價格 (USD)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">打折前價格 (RMB)</th>
-                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">打折前價格 (USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">折後價格 (RMB/USD)</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">打折前價格 (RMB/USD)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">對手售價 (USD)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">對手利潤 (RMB)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">對手利潤率 (%)</th>
@@ -2654,7 +2935,9 @@
         });
 
         document.getElementById('paginationInfo').innerText = `顯示第 ${startIdx + 1} 至 ${endIdx} 筆，共 ${totalItems} 筆商品`;
+        translateIfCN(document.getElementById('paginationInfo'));
         buildPaginationControls(totalPages);
+        translateIfCN(tableBody);
     }
 
     function buildPaginationControls(totalPages) {
@@ -2753,8 +3036,12 @@
             itemOverrides[itemKey].weight = val;
         } else if (field === 'activityDiscount') {
             itemOverrides[itemKey].activityDiscount = val;
+        } else if (field === 'platformFeeRate') {
+            itemOverrides[itemKey].platformFeeRate = val;
         } else if (field === 'margin') {
             itemOverrides[itemKey].margin = val / 100;
+        } else if (field === 'customPriceRMB') {
+            itemOverrides[itemKey].customPriceRMB = val;
         }
 
         renderTable();
@@ -2770,22 +3057,40 @@
         
         const thead = document.getElementById('tableHeader');
         if (mode === 'pricing') {
-            thead.innerHTML = `
-                <tr>
-                    <th style="width: 40px; text-align: center;">展開</th>
-                    <th>商品工作表</th>
-                    <th>商品編號</th>
-                    <th>採購成本 (RMB)</th>
-                    <th>商品重量 (KG)</th>
-                    <th>活動折扣 (%)</th>
-                    <th>無憂標準運費 (RMB)</th>
-                    <th>實際利潤 (%)</th>
-                    <th>折後價格 (RMB)</th>
-                    <th>折後價格 (USD)</th>
-                    <th>打折前價格 (RMB)</th>
-                    <th>打折前價格 (USD)</th>
-                </tr>
-            `;
+            if (manualCalcMode === 'price') {
+                thead.innerHTML = `
+                    <tr>
+                        <th style="width: 40px; text-align: center;">展開</th>
+                        <th>商品工作表</th>
+                        <th>商品編號</th>
+                        <th>採購成本 (RMB)</th>
+                        <th>商品重量 (KG)</th>
+                        <th>活動折扣 (%)</th>
+                        <th>平台手續 (%)</th>
+                        <th>無憂標準運費 (RMB)</th>
+                        <th>自訂售價 (RMB)</th>
+                        <th>實際利潤 (%)</th>
+                        <th>折後價格 (RMB / USD)</th>
+                        <th>打折前價格 (RMB / USD)</th>
+                    </tr>
+                `;
+            } else {
+                thead.innerHTML = `
+                    <tr>
+                        <th style="width: 40px; text-align: center;">展開</th>
+                        <th>商品工作表</th>
+                        <th>商品編號</th>
+                        <th>採購成本 (RMB)</th>
+                        <th>商品重量 (KG)</th>
+                        <th>活動折扣 (%)</th>
+                        <th>平台手續 (%)</th>
+                        <th>無憂標準運費 (RMB)</th>
+                        <th>目標實際利潤 (%)</th>
+                        <th>折後價格 (RMB / USD)</th>
+                        <th>打折前價格 (RMB / USD)</th>
+                    </tr>
+                `;
+            }
         } else {
             thead.innerHTML = `
                 <tr>
@@ -2796,11 +3101,11 @@
                     <th>商品重量 (KG)</th>
                     <th>無憂運費 (RMB)</th>
                     <th>總成本 (RMB)</th>
-                    <th>售價 (RMB)</th>
-                    <th>售價 (USD)</th>
-                    <th>平台佣金 (RMB)</th>
-                    <th>淨利潤 (RMB)</th>
-                    <th>實際利潤率 (%)</th>
+                    <th>對手售價 (RMB/USD)</th>
+                    <th>對手售價 (USD輸入)</th>
+                    <th>對手佣金 (RMB)</th>
+                    <th>對手淨利潤 (RMB)</th>
+                    <th>對手利潤率 (%)</th>
                     <th style="text-align: center;">說明</th>
                 </tr>
             `;
@@ -2836,7 +3141,7 @@
 
         const country = shippingRates[primaryCountry];
         const defaultWt = parseFloat(document.getElementById('defaultWeight').value) || 0.04;
-        const defaultActDisc = parseFloat(document.getElementById('defaultActivityDiscount').value) || 15;
+        const defaultActDisc = isNaN(parseFloat(document.getElementById('defaultActivityDiscount').value)) ? 0 : parseFloat(document.getElementById('defaultActivityDiscount').value);
         const extraDisc = parseFloat(document.getElementById('extraDiscount').value) || 0;
         const targetMargPercentage = parseFloat(document.getElementById('targetMargin').value) || 20;
         const exchRate = parseFloat(document.getElementById('exchangeRate').value) || 7.2;
@@ -2881,14 +3186,28 @@
                     while (newHeaders.length < maxCols) newHeaders.push("");
                     
                     if (currentViewMode === 'pricing') {
-                        newHeaders.push("計費重量(KG)");
-                        newHeaders.push("活動折扣(%)");
-                        newHeaders.push("無憂標準運費(RMB)");
-                        newHeaders.push("折後價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("折後價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("打折前價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("打折前價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
-                        newHeaders.push("實際利潤率(%)");
+                        if (manualCalcMode === 'price') {
+                            newHeaders.push("計費重量(KG)");
+                            newHeaders.push("活動折扣(%)");
+                            newHeaders.push("平台手續(%)");
+                            newHeaders.push("無憂標準運費(RMB)");
+                            newHeaders.push("自訂售價(RMB)");
+                            newHeaders.push("折後價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("折後價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("打折前價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("打折前價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("實際利潤率(%)");
+                        } else {
+                            newHeaders.push("計費重量(KG)");
+                            newHeaders.push("活動折扣(%)");
+                            newHeaders.push("平台手續(%)");
+                            newHeaders.push("無憂標準運費(RMB)");
+                            newHeaders.push("折後價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("折後價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("打折前價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("打折前價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
+                            newHeaders.push("實際利潤率(%)");
+                        }
                     } else {
                         newHeaders.push("計費重量(KG)");
                         newHeaders.push("無憂運費(RMB)");
@@ -2915,25 +3234,78 @@
                         const weight = (override.weight !== undefined) ? override.weight : defaultWt;
                         const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
                         const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
-                        const margin = (override.margin !== undefined) ? override.margin : targetMargin;
 
                         const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
-                        const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
+                        const platformFeeRateVal = (override.platformFeeRate !== undefined) ? override.platformFeeRate : platformFeeRate;
+                        const netPlatformFactor = 1 - Math.min(99, platformFeeRateVal) / 100;
                         const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
                         const totalDiscount = Math.min(99, activityDiscount + extraDisc);
                         const netDiscountFactor = 1 - totalDiscount / 100;
 
-                        let salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
-                        let retailPriceUSD = salePriceUSD / netDiscountFactor;
+                        let salePriceUSD = 0;
+                        let retailPriceUSD = 0;
+                        let salePriceRMB = 0;
+                        let retailPriceRMB = 0;
+                        let finalMarginPct = "";
+                        let myPriceRMB = 0;
 
-                        if (excludeShippingFee) {
-                            const shipUSD = shippingRMB / exchRate;
-                            salePriceUSD = Math.max(0.01, salePriceUSD - shipUSD);
-                            retailPriceUSD = Math.max(0.01, retailPriceUSD - shipUSD);
+                        if (manualCalcMode === 'price') {
+                            // Mode 1: 自訂售價模式
+                            let defaultPrice = 0;
+                            if (item.priceColIdx !== -1 && item.originalRow[item.priceColIdx] !== undefined) {
+                                defaultPrice = parseFloat(item.originalRow[item.priceColIdx]) || 0;
+                            } else {
+                                defaultPrice = totalCostRMB * (1 + targetMargin) - shippingRMB;
+                                defaultPrice = Math.max(0, defaultPrice);
+                            }
+
+                            myPriceRMB = (override.customPriceRMB !== undefined) ? override.customPriceRMB : defaultPrice;
+
+                            // Mode 1 formulas
+                            const isBaoYouInput = !excludeShippingFee;
+                            let displayInputPriceRMB = 0;
+                            let displayDiscountedPriceRMB = 0;
+                            let myGrossPriceRMB = 0;
+                            let suggestedRetailRMB = 0;
+
+                            if (isBaoYouInput) {
+                                displayInputPriceRMB = myPriceRMB + shippingRMB;
+                                myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
+                                displayDiscountedPriceRMB = myGrossPriceRMB;
+                                suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
+                            } else {
+                                displayInputPriceRMB = myPriceRMB;
+                                displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                                myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
+                                suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
+                            }
+
+                            const myCommissionRMB = myGrossPriceRMB * (platformFeeRateVal / 100);
+                            const myNetRevenueRMB = myGrossPriceRMB - myCommissionRMB;
+                            const myProfitRMB = myNetRevenueRMB - totalCostRMB;
+                            const myProfitRate = (myProfitRMB / totalCostRMB) * 100;
+
+                            salePriceRMB = displayDiscountedPriceRMB;
+                            salePriceUSD = displayDiscountedPriceRMB / exchRate;
+                            retailPriceRMB = suggestedRetailRMB;
+                            retailPriceUSD = suggestedRetailRMB / exchRate;
+                            finalMarginPct = myProfitRate.toFixed(1) + "%";
+                        } else {
+                            // Mode 2: 目標利潤模式
+                            const margin = (override.margin !== undefined) ? override.margin : targetMargin;
+                            salePriceUSD = (totalCostRMB * (1 + margin)) / (exchRate * netPlatformFactor);
+                            retailPriceUSD = salePriceUSD / netDiscountFactor;
+
+                            if (excludeShippingFee) {
+                                const shipUSD = shippingRMB / exchRate;
+                                salePriceUSD = Math.max(0.01, salePriceUSD - shipUSD);
+                                retailPriceUSD = Math.max(0.01, retailPriceUSD - shipUSD);
+                            }
+
+                            salePriceRMB = salePriceUSD * exchRate;
+                            retailPriceRMB = retailPriceUSD * exchRate;
+                            finalMarginPct = Math.round(margin * 100) + "%";
                         }
-
-                        const salePriceRMB = salePriceUSD * exchRate;
-                        const retailPriceRMB = retailPriceUSD * exchRate;
 
                         const originalRowCopy = [...item.originalRow];
                         while (originalRowCopy.length < maxCols) originalRowCopy.push("");
@@ -2941,21 +3313,25 @@
                         if (currentViewMode === 'pricing') {
                             originalRowCopy.push(weight);
                             originalRowCopy.push(activityDiscount + "%");
+                            originalRowCopy.push(platformFeeRateVal + "%");
                             originalRowCopy.push(shippingRMB);
+                            if (manualCalcMode === 'price') {
+                                originalRowCopy.push(myPriceRMB);
+                            }
                             originalRowCopy.push(salePriceRMB);
                             originalRowCopy.push(salePriceUSD);
                             originalRowCopy.push(retailPriceRMB);
                             originalRowCopy.push(retailPriceUSD);
-                            originalRowCopy.push(Math.round(margin * 100) + "%");
+                            originalRowCopy.push(finalMarginPct);
                         } else {
                             const competitorPriceUSD = (competitorPrices[itemKey] !== undefined) ? competitorPrices[itemKey] : salePriceUSD;
                             const competitorPriceRMB = competitorPriceUSD * exchRate;
-                            const competitorFeeRMB = competitorPriceRMB * (platformFeeRate / 100);
+                            const competitorFeeRMB = competitorPriceRMB * (platformFeeRateVal / 100);
                             const competitorNetRevenueRMB = competitorPriceRMB - competitorFeeRMB;
                             const competitorProfitRMB = competitorNetRevenueRMB - totalCostRMB;
                             const competitorProfitRate = (competitorProfitRMB / totalCostRMB) * 100;
 
-                            const yourFeeRMB = salePriceRMB * (platformFeeRate / 100);
+                            const yourFeeRMB = salePriceRMB * (platformFeeRateVal / 100);
                             const yourNetRevenueRMB = salePriceRMB - yourFeeRMB;
                             const yourProfitRMB = yourNetRevenueRMB - totalCostRMB;
                             const yourProfitRate = (yourProfitRMB / totalCostRMB) * 100;
