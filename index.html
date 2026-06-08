@@ -1296,6 +1296,18 @@
                     <input type="number" class="input-control" id="exchangeRate" value="7.2" step="0.01" min="1" oninput="updateGlobalSettings()">
                 </div>
 
+                <!-- Morocco DPP Rate (%) -->
+                <div class="input-group">
+                    <label>摩洛哥 DPP 稅率 (%)</label>
+                    <input type="number" class="input-control" id="dppMoroccoRate" value="52" step="1" min="0" max="100" oninput="updateGlobalSettings()">
+                </div>
+
+                <!-- Colombia DPP Rate (%) -->
+                <div class="input-group">
+                    <label>哥倫比亞 DPP 稅率 (%)</label>
+                    <input type="number" class="input-control" id="dppColombiaRate" value="19" step="1" min="0" max="100" oninput="updateGlobalSettings()">
+                </div>
+
                 <!-- Exclude Shipping Fee Toggle Switch -->
                 <div class="input-group" style="justify-content: center; align-items: flex-start; height: 100%;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; margin-top: 1.35rem;">
@@ -2124,6 +2136,16 @@
         }
     }
 
+    function getDppRate(countryCode) {
+        if (countryCode === 'MA') {
+            return (parseFloat(document.getElementById('dppMoroccoRate').value) || 52) / 100;
+        }
+        if (countryCode === 'CO') {
+            return (parseFloat(document.getElementById('dppColombiaRate').value) || 19) / 100;
+        }
+        return 0;
+    }
+
     // Core Shipping Engine Calculation
     function calculateBaseShippingRMB(countryCode, weightKg, isSpecial) {
         if (!shippingRates || !shippingRates[countryCode]) return 0;
@@ -2178,7 +2200,10 @@
         const targetMargin = isNaN(manualMarginVal) ? 0.20 : (manualMarginVal / 100);
         const targetMargPercentage = isNaN(manualMarginVal) ? 20 : manualMarginVal;
         const shippingRMB = calculateBaseShippingRMB(selectedCountryCode, weight, isSpecialCargo);
-        const totalCostRMB = cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+        const physicalCostRMB = cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+        const dppRate = getDppRate(selectedCountryCode);
+        const dppTaxRMB = physicalCostRMB * dppRate;
+        const totalCostRMB = physicalCostRMB + dppTaxRMB;
 
         // Suggested formulas
         const netPlatformFactor = 1 - Math.min(99, platformFeeRate) / 100;
@@ -2215,8 +2240,8 @@
             let suggestedRetailRMB = 0;
 
             if (isBaoYouInput) {
-                // Free Shipping: Original price = custom selling price + shipping
-                displayInputPriceRMB = myPriceRMB + shippingRMB;
+                // Free Shipping: Original price = custom selling price + shipping + DPP tax
+                displayInputPriceRMB = myPriceRMB + shippingRMB + dppTaxRMB;
                 // Actual buyer payment (gross price with platform fee markup)
                 myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
                 // Price after activity discount (discount applied on the entire free shipping price)
@@ -2224,10 +2249,10 @@
                 // Suggested listing price (retail price before discount)
                 suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
             } else {
-                // Non-Free Shipping: Original price = custom selling price
-                displayInputPriceRMB = myPriceRMB;
-                // Price after activity discount (discount applied on selling price)
-                displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                // Non-Free Shipping: Original price = custom selling price + DPP tax
+                displayInputPriceRMB = myPriceRMB + dppTaxRMB;
+                // Price after activity discount (discount applied on selling price + DPP tax markup)
+                displayDiscountedPriceRMB = (myPriceRMB + shippingRMB + dppTaxRMB) / netPlatformFactor - shippingRMB;
                 // Actual buyer payment (gross price with platform fee markup + shipping)
                 myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
                 // Suggested listing price (retail price before discount)
@@ -2262,7 +2287,7 @@
                 <div class="result-box">
                     <div class="result-label">實際交易總成本</div>
                     <div class="result-value val-primary">¥${actualTotalCostRMB.toFixed(2)}</div>
-                    <div class="result-desc">商品 ¥${cost.toFixed(2)} ${isBaoYouInput ? `| 運費 ¥${shippingRMB.toFixed(2)}` : ''} | 佣金 ¥${myCommissionRMB.toFixed(2)}</div>
+                    <div class="result-desc">商品 ¥${cost.toFixed(2)} ${isBaoYouInput ? `| 運費 ¥${shippingRMB.toFixed(2)}` : ''} | 佣金 ¥${myCommissionRMB.toFixed(2)}${dppTaxRMB > 0 ? ` | DPP稅金(${(dppRate*100).toFixed(0)}%) ¥${dppTaxRMB.toFixed(2)}` : ''}</div>
                 </div>
                 <div class="result-box">
                     <div class="result-label">活動折扣後的價格</div>
@@ -2340,7 +2365,7 @@
                 <div class="result-box">
                     <div class="result-label">總成本 (含平台手續)</div>
                     <div class="result-value val-primary">¥${displayedTotalCostRMB.toFixed(2)}</div>
-                    <div class="result-desc">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%</div>
+                    <div class="result-desc">物理成本 ¥${totalCostRMB.toFixed(2)} | 平台: ${platformFeeRate}%${dppTaxRMB > 0 ? ` | DPP稅金(${(dppRate*100).toFixed(0)}%) ¥${dppTaxRMB.toFixed(2)}` : ''}</div>
                 </div>
                 <div class="result-box">
                     <div class="result-label" style="display: flex; align-items: center; gap: 0.25rem;">
@@ -2509,7 +2534,10 @@
             const rates = shippingRates[code];
 
             const shippingRMB = calculateBaseShippingRMB(code, weight, isSpecialCargo);
-            const totalCostRMB = currentItem.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+            const physicalCostRMB = currentItem.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+            const dppRate = getDppRate(code);
+            const dppTaxRMB = physicalCostRMB * dppRate;
+            const totalCostRMB = physicalCostRMB + dppTaxRMB;
 
             const netPlatformFactor = 1 - Math.min(99, platformFeeRateVal) / 100;
             const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
@@ -2542,13 +2570,13 @@
                 let suggestedRetailRMB = 0;
 
                 if (isBaoYouInput) {
-                    displayInputPriceRMB = myPriceRMB + shippingRMB;
+                    displayInputPriceRMB = myPriceRMB + shippingRMB + dppTaxRMB;
                     myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
                     displayDiscountedPriceRMB = myGrossPriceRMB;
                     suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
                 } else {
-                    displayInputPriceRMB = myPriceRMB;
-                    displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                    displayInputPriceRMB = myPriceRMB + dppTaxRMB;
+                    displayDiscountedPriceRMB = (myPriceRMB + shippingRMB + dppTaxRMB) / netPlatformFactor - shippingRMB;
                     myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
                     suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
                 }
@@ -2596,6 +2624,7 @@
                     <td style="font-weight:600; padding: 0.3rem 0.5rem;">${primaryMarker}${rates.name} (${rates.code})</td>
                     <td style="text-align:center; padding: 0.3rem 0.5rem;">${weight.toFixed(3)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-cyan);">¥${shippingRMB.toFixed(2)}</td>
+                    <td style="text-align:right; padding: 0.3rem 0.5rem; color:var(--accent-pink);">¥${dppTaxRMB.toFixed(2)}${dppTaxRMB > 0 ? ` <small style="font-size:0.7rem; color:var(--text-muted);">(${(dppRate*100).toFixed(0)}%)</small>` : ''}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem;">¥${displayedTotalCostRMB.toFixed(2)}</td>
                     <td style="text-align:right; padding: 0.3rem 0.5rem; font-weight:600; color:var(--accent-green);">
                         ¥${saleRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${saleUSD.toFixed(2)}</small>
@@ -2672,8 +2701,10 @@
             const weight = (override.weight !== undefined) ? override.weight : defaultWt;
             const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
             const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
-
-            const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+            const physicalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+            const dppRate = getDppRate(primaryCountry);
+            const dppTaxRMB = physicalCostRMB * dppRate;
+            const totalCostRMB = physicalCostRMB + dppTaxRMB;
 
             const platformFeeRateVal = (override.platformFeeRate !== undefined) ? override.platformFeeRate : platformFeeRate;
             const netPlatformFactor = 1 - Math.min(99, platformFeeRateVal) / 100;
@@ -2710,13 +2741,13 @@
                 let suggestedRetailRMB = 0;
 
                 if (isBaoYouInput) {
-                    displayInputPriceRMB = myPriceRMB + shippingRMB;
+                    displayInputPriceRMB = myPriceRMB + shippingRMB + dppTaxRMB;
                     myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
                     displayDiscountedPriceRMB = myGrossPriceRMB;
                     suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
                 } else {
-                    displayInputPriceRMB = myPriceRMB;
-                    displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                    displayInputPriceRMB = myPriceRMB + dppTaxRMB;
+                    displayDiscountedPriceRMB = (myPriceRMB + shippingRMB + dppTaxRMB) / netPlatformFactor - shippingRMB;
                     myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
                     suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
                 }
@@ -2798,6 +2829,7 @@
                             onchange="handleRowOverride('${item.code}', 'platformFeeRate', this.value)" style="width:50px;"> <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
                     </td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
+                    <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; color: var(--accent-pink);">¥${dppTaxRMB.toFixed(2)}${dppTaxRMB > 0 ? ` <small style="font-size:0.7rem; color:var(--text-muted);">(${(dppRate*100).toFixed(0)}%)</small>` : ''}</td>
                     ${displayPriceInputHTML}
                     ${displayMarginHTML}
                     <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.6rem;">
@@ -2833,6 +2865,7 @@
                             onchange="handleRowOverride('${item.code}', 'weight', this.value)" style="width:70px;">
                     </td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">¥${shippingRMB.toFixed(2)}</td>
+                    <td class="highlight-text" style="text-align: right; padding-right: 0.8rem; color: var(--accent-pink);">¥${dppTaxRMB.toFixed(2)}${dppTaxRMB > 0 ? ` <small style="font-size:0.7rem; color:var(--text-muted);">(${(dppRate*100).toFixed(0)}%)</small>` : ''}</td>
                     <td style="font-weight:500; text-align: right; padding-right: 0.8rem; color: var(--text-main);">¥${displayedTotalCostRMB.toFixed(2)}</td>
                     <td class="highlight-text highlight-cyan" style="text-align: right; padding-right: 0.8rem;">
                         ¥${competitorPriceRMB.toFixed(2)} / <small style="font-size:0.75rem; color:var(--text-muted);">$${competitorPriceUSD.toFixed(2)}</small>
@@ -2865,7 +2898,7 @@
                 const absYourProfitVal = Math.abs(yourProfitRMB).toFixed(2);
                 
                 trYour.innerHTML = `
-                    <td colspan="7" style="text-align: right; font-weight: 700; color: var(--accent-green); background: rgba(74, 112, 85, 0.03); padding-right: 1.2rem;">
+                    <td colspan="8" style="text-align: right; font-weight: 700; color: var(--accent-green); background: rgba(74, 112, 85, 0.03); padding-right: 1.2rem;">
                         🛡️ 您的建議定價對比:
                     </td>
                     <td class="highlight-text highlight-green" style="text-align: right; padding-right: 0.8rem; background: rgba(74, 112, 85, 0.03);">
@@ -2911,6 +2944,7 @@
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem;">對比國家</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:center;">計費重量 (KG)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">無憂標準運費</th>
+                                    <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">DPP 稅金 (RMB)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">總成本 (RMB)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">折後價格 (RMB/USD)</th>
                                     <th style="padding: 0.25rem 0.4rem; font-size: 0.72rem; text-align:right;">打折前價格 (RMB/USD)</th>
@@ -3068,6 +3102,7 @@
                         <th>活動折扣 (%)</th>
                         <th>平台手續 (%)</th>
                         <th>無憂標準運費 (RMB)</th>
+                        <th>DPP 稅金 (RMB)</th>
                         <th>自訂售價 (RMB)</th>
                         <th>實際利潤 (%)</th>
                         <th>折後價格 (RMB / USD)</th>
@@ -3085,6 +3120,7 @@
                         <th>活動折扣 (%)</th>
                         <th>平台手續 (%)</th>
                         <th>無憂標準運費 (RMB)</th>
+                        <th>DPP 稅金 (RMB)</th>
                         <th>目標實際利潤 (%)</th>
                         <th>折後價格 (RMB / USD)</th>
                         <th>打折前價格 (RMB / USD)</th>
@@ -3100,6 +3136,7 @@
                     <th>採購成本 (RMB)</th>
                     <th>商品重量 (KG)</th>
                     <th>無憂運費 (RMB)</th>
+                    <th>DPP 稅金 (RMB)</th>
                     <th>總成本 (RMB)</th>
                     <th>對手售價 (RMB/USD)</th>
                     <th>對手售價 (USD輸入)</th>
@@ -3191,6 +3228,7 @@
                             newHeaders.push("活動折扣(%)");
                             newHeaders.push("平台手續(%)");
                             newHeaders.push("無憂標準運費(RMB)");
+                            newHeaders.push("DPP稅金(RMB)");
                             newHeaders.push("自訂售價(RMB)");
                             newHeaders.push("折後價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
                             newHeaders.push("折後價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
@@ -3202,6 +3240,7 @@
                             newHeaders.push("活動折扣(%)");
                             newHeaders.push("平台手續(%)");
                             newHeaders.push("無憂標準運費(RMB)");
+                            newHeaders.push("DPP稅金(RMB)");
                             newHeaders.push("折後價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
                             newHeaders.push("折後價格(USD)" + (excludeShippingFee ? "[不含運]" : ""));
                             newHeaders.push("打折前價格(RMB)" + (excludeShippingFee ? "[不含運]" : ""));
@@ -3211,6 +3250,7 @@
                     } else {
                         newHeaders.push("計費重量(KG)");
                         newHeaders.push("無憂運費(RMB)");
+                        newHeaders.push("DPP稅金(RMB)");
                         newHeaders.push("總成本(RMB)");
                         newHeaders.push("對手售價(RMB)");
                         newHeaders.push("對手售價(USD)");
@@ -3234,8 +3274,10 @@
                         const weight = (override.weight !== undefined) ? override.weight : defaultWt;
                         const activityDiscount = (override.activityDiscount !== undefined) ? override.activityDiscount : defaultActDisc;
                         const shippingRMB = calculateBaseShippingRMB(primaryCountry, weight, isSpecialCargo);
-
-                        const totalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+                        const physicalCostRMB = item.cost + domesticShippingRMB + shippingRMB + customsFeeRMB;
+                        const dppRate = getDppRate(primaryCountry);
+                        const dppTaxRMB = physicalCostRMB * dppRate;
+                        const totalCostRMB = physicalCostRMB + dppTaxRMB;
                         const platformFeeRateVal = (override.platformFeeRate !== undefined) ? override.platformFeeRate : platformFeeRate;
                         const netPlatformFactor = 1 - Math.min(99, platformFeeRateVal) / 100;
                         const displayedTotalCostRMB = totalCostRMB / netPlatformFactor;
@@ -3269,13 +3311,13 @@
                             let suggestedRetailRMB = 0;
 
                             if (isBaoYouInput) {
-                                displayInputPriceRMB = myPriceRMB + shippingRMB;
+                                displayInputPriceRMB = myPriceRMB + shippingRMB + dppTaxRMB;
                                 myGrossPriceRMB = displayInputPriceRMB / netPlatformFactor;
                                 displayDiscountedPriceRMB = myGrossPriceRMB;
                                 suggestedRetailRMB = myGrossPriceRMB / netDiscountFactor;
                             } else {
-                                displayInputPriceRMB = myPriceRMB;
-                                displayDiscountedPriceRMB = (myPriceRMB + shippingRMB) / netPlatformFactor - shippingRMB;
+                                displayInputPriceRMB = myPriceRMB + dppTaxRMB;
+                                displayDiscountedPriceRMB = (myPriceRMB + shippingRMB + dppTaxRMB) / netPlatformFactor - shippingRMB;
                                 myGrossPriceRMB = displayDiscountedPriceRMB + shippingRMB;
                                 suggestedRetailRMB = displayDiscountedPriceRMB / netDiscountFactor;
                             }
@@ -3315,6 +3357,7 @@
                             originalRowCopy.push(activityDiscount + "%");
                             originalRowCopy.push(platformFeeRateVal + "%");
                             originalRowCopy.push(shippingRMB);
+                            originalRowCopy.push(dppTaxRMB);
                             if (manualCalcMode === 'price') {
                                 originalRowCopy.push(myPriceRMB);
                             }
@@ -3338,6 +3381,7 @@
 
                             originalRowCopy.push(weight);
                             originalRowCopy.push(shippingRMB);
+                            originalRowCopy.push(dppTaxRMB);
                             originalRowCopy.push(parseFloat(displayedTotalCostRMB.toFixed(2)));
                             originalRowCopy.push(competitorPriceRMB);
                             originalRowCopy.push(competitorPriceUSD);
